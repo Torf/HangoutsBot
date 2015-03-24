@@ -29,7 +29,7 @@ def think(bot, event, *args):
         for arg in args:
             if arg not in bot.config['autoreplies'][0][0]:
                 cleanargs.append(arg)
-        yield from bot.send_message(event.conv, clever_session.think(' '.join(cleanargs)))
+        bot.send_message(event.conv, clever_session.think(' '.join(cleanargs)))
 
 
 @DispatcherSingleton.register

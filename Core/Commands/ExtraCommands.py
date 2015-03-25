@@ -31,54 +31,6 @@ def me(bot, event, *args):
 def image(bot, event, *args):
     yield from img(bot, event, *args)
 
-@DispatcherSingleton.register_hidden
-def load_ezhiks(bot, event, *args):
-    file_exception = False
-    # load ezhiks.json
-    try:
-        imageids_filename = 'ezhiks.json'
-        imageids = json.loads(open(imageids_filename, encoding='utf-8').read(), encoding='utf-8')
-    except IOError as e:
-        if e.errno == errno.ENOENT:
-            imageids = {}
-        else:
-           print('Exception:')
-           print(str(e))
-           file_exception = True
-    # loop through ezhiks folder
-    for filename in glob(os.path.join('ezhiks', '*')):
-        # if filename not in imageids, upload it and store filename,id
-        filekey = os.path.split(filename)[1]
-        imageID = imageids.get(filekey)
-        if imageID is None:
-            imageID = yield from bot._client.upload_image(filename)
-            if not file_exception:
-                imageids[filekey] = imageID
-                with open(imageids_filename, 'w') as f:
-                    json.dump(imageids, f, indent=2, sort_keys=True)
-                os.remove(filename)
-
-@DispatcherSingleton.register
-def ezhik(bot, event, *args):
-    file_exception = False
-    try:
-        imageids_filename = 'ezhiks.json'
-        imageids = json.loads(open(imageids_filename, encoding='utf-8').read(), encoding='utf-8')
-    except IOError as e:
-        imageids = {}
-        if e.errno == errno.ENOENT:
-           print('Exception: ezhiks.json not found!')
-        else:
-           print('Exception:')
-           print(str(e))
-           file_exception = True
-        return
-    imageID = imageids.get(random.choice(list(imageids.keys())))
-    if imageID is None:
-        print('Exception: ezhik not found (this should never happen!)')
-    else:
-        bot.send_image(event.conv, imageID)
-
 @DispatcherSingleton.register
 def img(bot, event, *args):
     if len(args) > 0:
@@ -114,17 +66,17 @@ def count(bot, event, *args):
                      '"' + words + '"' + " has " + str(count) + (' syllable.' if count == 1 else ' syllables.'))
 
 @DispatcherSingleton.register
-def log(bot, event, *args):
-    msg = ' '.join(args)
-    log = open('log.txt', 'a+')
-    log.writelines(msg + "\n")
-    for c in msg: log.writelines(hex(ord(c)) + " ")
-    log.writelines("\n")
-    log.close()
-
-@DispatcherSingleton.register
 def rate(bot, event, *args):
-    ratings = dict(
+    if ''.join(args) == '?':
+        segments = UtilBot.text_to_segments("""\
+*Rate smileys*
+Usage: /rate <key> 
+Purpose: Send a rating smiley, key can be: agree, disagree, funny, winner, 
+zing, informative, friendly, useful, optimistic, artistic, late, dumb or box.
+""")
+        bot.send_message_segments(event.conv, segments)
+    else:
+        ratings = dict(
                    agree      ="\u2714"
                   ,disagree   ="\u274c"
                   ,funny      ="\U0001f604"
@@ -139,11 +91,10 @@ def rate(bot, event, *args):
                   ,dumb       ="\U0001f4e6"
                   ,box        ="\U0001f4e6"
                   )
-
-    try:
-        bot.send_message(event.conv, ratings[args[0]])
-    except KeyError:
-        bot.send_message(event.conv, "That's not a valid rating. You are \U0001f4e6 x 1")
+        try:
+            bot.send_message(event.conv, ratings[args[0].lower()])
+        except KeyError:
+            bot.send_message(event.conv, "That's not a valid rating. You are \U0001f4e6 x 1")
 
 @DispatcherSingleton.register
 def udefine(bot, event, *args):
@@ -665,19 +616,6 @@ Purpose: Get the first result from YouTube\'s search using search parameter.
                                                    hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
                                                    hangups.ChatMessageSegment(item_title, hangups.SegmentType.LINK,
                                                                               link_target=item_url)])
-
-@DispatcherSingleton.register
-def linktest(bot, event, *args):
-        link_url = 'http://facepunch.com'
-        link_title = 'Facepunch'
-        bot.send_message_segments(event.conv,
-                                  [hangups.ChatMessageSegment(link_title,
-                                                              hangups.SegmentType.LINK,
-                                                              link_target=link_url),
-                                   hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
-                                   hangups.ChatMessageSegment(link_url,
-                                                              hangups.SegmentType.LINK,
-                                                              link_target=link_url)])
 
 @DispatcherSingleton.register
 def roulette(bot, event, *args):

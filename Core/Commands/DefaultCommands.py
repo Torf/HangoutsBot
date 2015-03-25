@@ -26,15 +26,19 @@ def unknown_command(bot, event, *args):
 @DispatcherSingleton.register_hidden
 def think(bot, event, *args):
     if clever_session:
-        cleanargs = []
-        for arg in args:
-            if arg not in bot.config['autoreplies'][0][0]:
-                cleanargs.append(arg)
-                
         answer = clever_session.think(' '.join(cleanargs))
         answer = html.unescape(answer)
         yield from bot.send_message(event.conv, answer)
-
+        
+@DispatcherSingleton.register_hidden
+def cleanthink(bot, event, *args):
+    if clever_session:
+        cleanargs = []
+        for arg in args:
+            if arg.lower() != bot.config['autoreplies_name']:
+                cleanargs.append(arg)
+        
+        yield from think(bot, event, *cleanargs)
 
 @DispatcherSingleton.register
 def help(bot, event, command=None, *args):

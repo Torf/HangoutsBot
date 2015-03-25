@@ -81,6 +81,14 @@ def count(bot, event, *args):
                      '"' + words + '"' + " has " + str(count) + (' syllable.' if count == 1 else ' syllables.'))
 
 @DispatcherSingleton.register
+def fliptable(bot, event, *args):
+    bot.send_message(event.conv, '(╯°□°）╯︵ ┻━┻')
+    
+@DispatcherSingleton.register
+def lenny(bot, event, *args):
+    bot.send_message(event.conv, '( ͡° ͜ʖ ͡°)')
+
+@DispatcherSingleton.register
 def rate(bot, event, *args):
     if ''.join(args) == '?':
         segments = UtilBot.text_to_segments("""\

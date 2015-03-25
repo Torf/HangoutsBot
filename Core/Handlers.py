@@ -130,7 +130,7 @@ class MessageHandler(object):
         if autoreplies_list:
             for kwds, sentence in autoreplies_list:
                 for kw in kwds:
-                    if self.word_in_text(kw, event.text) or kw == "*":
+                    if kw == "*" or self.word_in_text(kw, event.text):
                         if sentence[0] == self.command_char:
                             yield from self.bot._client.settyping(event.conv_id)
                             event.text = sentence.format(event.text)

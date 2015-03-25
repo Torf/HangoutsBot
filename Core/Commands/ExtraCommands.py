@@ -70,7 +70,7 @@ def imgur(bot, event, *args):
     imageID = yield from bot._client.upload_image(filepath)
     os.remove(filepath)
     # send it
-    bot.send_image(event.conv, imageID)
+    yield from bot.send_image(event.conv, imageID)
     bot.send_message_segments(event.conv, [hangups.ChatMessageSegment(link_url, hangups.SegmentType.LINK, link_target=link_url)])
 
 @DispatcherSingleton.register

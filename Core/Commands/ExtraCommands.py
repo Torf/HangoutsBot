@@ -64,9 +64,8 @@ def imgur(bot, event, *args):
     randImgur = RandomImgur()
     filename = 'output/' + randImgur.generate(1)[0]
     imageID = yield from bot._client.upload_image(filename)
-    if not file_exception:
-        os.remove(filename)
-        bot.send_image(event.conv, imageID)
+    os.remove(filename)
+    bot.send_image(event.conv, imageID)
 
 @DispatcherSingleton.register
 def count(bot, event, *args):

@@ -62,10 +62,11 @@ def img(bot, event, *args):
 @DispatcherSingleton.register
 def imgur(bot, event, *args):
     randImgur = RandomImgur()
-    filename = 'output/' + randImgur.generate(1)[0]
-    imageID = yield from bot._client.upload_image(filename)
+    filename = randImgur.generate(1)[0]
+    filepath = 'output/' + filename
+    imageID = yield from bot._client.upload_image(filepath)
     os.remove(filename)
-    bot.send_image(event.conv, imageID)
+    bot.send_image_with_message(event.conv, UtilBot.text_to_segments("http://i.imgur.com/%s"%filename), imageID)
 
 @DispatcherSingleton.register
 def count(bot, event, *args):

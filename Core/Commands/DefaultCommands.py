@@ -47,7 +47,7 @@ def cleanthink(bot, event, *args):
             if arg.lower() != bot.config['autoreplies_name']:
                 cleanargs.append(arg)
         
-        yield from think(bot, event, *cleanargs)
+        think(bot, event, *cleanargs)
 
 @DispatcherSingleton.register
 def help(bot, event, command=None, *args):

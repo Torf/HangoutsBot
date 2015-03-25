@@ -47,7 +47,7 @@ def continuethink(bot, event, *args):
     if clever_session:
         if event.user_id in last_answer:
             diff = last_answer[event.user_id] - event.timestamp
-            if diff < 120:
+            if diff.total_seconds() < 120:
                 yield from think(bot, event, *args)
 
 @DispatcherSingleton.register

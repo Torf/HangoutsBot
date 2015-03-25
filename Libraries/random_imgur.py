@@ -64,10 +64,10 @@ class ThreadSpawn(threading.Thread):
                 try:
                     data = urlopen(req)
                 except HTTPError as e:
-                    #print("HTTP Error: "+str(e.code)+' '+image_name)
+                    
                 except URLError as e:
-                    #print("URL Error: "+str(e.reason)+' '+image_name)
-
+                    
+                
                 if data:
                     try:
                         data = data.read();

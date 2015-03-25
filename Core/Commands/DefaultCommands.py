@@ -26,7 +26,7 @@ def unknown_command(bot, event, *args):
 @DispatcherSingleton.register_hidden
 def think(bot, event, *args):
     if clever_session:
-        answer = clever_session.think(' '.join(cleanargs))
+        answer = clever_session.think(' '.join(args))
         answer = html.unescape(answer)
         yield from bot.send_message(event.conv, answer)
         

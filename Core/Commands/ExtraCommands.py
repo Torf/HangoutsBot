@@ -709,22 +709,6 @@ def eightball(bot, event, *args):
         bot.send_message(event.conv, _checkTheBall(len(' '.join(args))))
     else:
         bot.send_message(event.conv, _checkTheBall(random.randint(0, 2)))
-
-@DispatcherSingleton.register
-def source(bot, event, *args):
-    if ''.join(args) == '?':
-        segments = UtilBot.text_to_segments("""\
-*Source*
-Usage: /source
-Purpose: Links to the GitHub
-""")
-        bot.send_message_segments(event.conv, segments)
-    else:
-        url = 'https://github.com/ShaunOfTheLive/HangoutsBot'
-        segments = [hangups.ChatMessageSegment(url,
-                                               hangups.SegmentType.LINK,
-                                               link_target=url)]
-        bot.send_message_segments(event.conv, segments)
         
 @DispatcherSingleton.register
 def fliptext(bot, event, *args):
@@ -795,14 +779,14 @@ def greentext(bot, event, *args):
         output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         output = output.decode(encoding='UTF-8')
         if output != '':
-            bot.send_message(event.conv, output)
+            print(output)
         imageID = yield from bot._client.upload_image(filename)
         bot.send_image(event.conv, imageID)
         os.remove(filename)
     except subprocess.CalledProcessError as e:
         output = e.output.decode(encoding='UTF-8')
         if output != '':
-            bot.send_message(event.conv, output)
+            print(output)
 
 @DispatcherSingleton.register
 def colour(bot, event, *args):
@@ -820,12 +804,12 @@ def color(bot, event, *args):
         output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         output = output.decode(encoding='UTF-8')
         if output != '':
-            bot.send_message(event.conv, output)
+            print(output)
         imageID = yield from bot._client.upload_image(filename)
         bot.send_image(event.conv, imageID)
         os.remove(filename)
     except subprocess.CalledProcessError as e:
         output = e.output.decode(encoding='UTF-8')
         if output != '':
-            bot.send_message(event.conv, output)
+            print(output)
 

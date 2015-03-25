@@ -26,17 +26,9 @@ def unknown_command(bot, event, *args):
 @DispatcherSingleton.register_hidden
 def think(bot, event, *args):
     if clever_session:
-        tries = 0
-        answer = None
-        while tries < 3 and answer == None:
-            try:
-                answer = clever_session.think(' '.join(args))
-                answer = html.unescape(answer)
-            except Exception:
-                answer = None
-                tries += 1
-            
-            yield from bot.send_message(event.conv, answer)
+        answer = clever_session.think(' '.join(args))
+        answer = html.unescape(answer)
+        yield from bot.send_message(event.conv, answer)
         
 @DispatcherSingleton.register_hidden
 def cleanthink(bot, event, *args):

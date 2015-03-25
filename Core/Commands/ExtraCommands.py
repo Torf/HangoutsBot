@@ -65,7 +65,7 @@ def imgur(bot, event, *args):
     filename = randImgur.generate(1)[0]
     filepath = 'output/' + filename
     imageID = yield from bot._client.upload_image(filepath)
-    os.remove(filename)
+    os.remove(filepath)
     bot.send_image_with_message(event.conv, UtilBot.text_to_segments("http://i.imgur.com/%s"%filename), imageID)
 
 @DispatcherSingleton.register

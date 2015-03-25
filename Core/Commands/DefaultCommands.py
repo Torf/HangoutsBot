@@ -46,7 +46,7 @@ def cleanthink(bot, event, *args):
 def continuethink(bot, event, *args):
     if clever_session:
         if event.user_id in last_answer:
-            diff = last_anwser[event.user_id] - event.timestamp
+            diff = last_answer[event.user_id] - event.timestamp
             if diff < 120:
                 yield from think(bot, event, *args)
 

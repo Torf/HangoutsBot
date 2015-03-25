@@ -36,8 +36,7 @@ def think(bot, event, *args):
                 answer = None
                 tries += 1
             
-            bot.send_message(event.conv, answer)
-            break
+            yield from bot.send_message(event.conv, answer)
         
 @DispatcherSingleton.register_hidden
 def cleanthink(bot, event, *args):

@@ -66,7 +66,8 @@ def imgur(bot, event, *args):
     filepath = 'output/' + filename
     imageID = yield from bot._client.upload_image(filepath)
     os.remove(filepath)
-    bot.send_image_with_message(event.conv, UtilBot.text_to_segments("http://i.imgur.com/%s"%filename), imageID)
+    bot.send_image(event.conv, imageID)
+    bot.send_message(event.conv, "http://i.imgur.com/%s"%filename)
 
 @DispatcherSingleton.register
 def count(bot, event, *args):

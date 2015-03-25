@@ -743,17 +743,43 @@ Purpose: Renders LaTeX code to an image and sends it
 
 @DispatcherSingleton.register
 def greentext(bot, event, *args):
-    if ''.join(args) == '?':
-        segments = UtilBot.text_to_segments("""\
-*Greentext*
-Usage: /greentext <text>
-Purpose: makes your text green and adds an epic maymay arrow
-""")
-        bot.send_message_segments(event.conv, segments)
-    else:
-        template = "\definecolor{4chan}{RGB}{120,153,34}{\color{4chan}>\!\!\\text{%s}}"
-        args = template % ' '.join(args)
-        yield from latex(bot, event, args)
+    """
+    *Greentext*
+    Usage: /greentext <text>
+    Purpose: makes your text green and adds an epic maymay arrow
+    """
+    filename = 'greentext.png'
+    message = ' '.join(args)
+    if message[0] == '>':
+        message = message[1:]
+    message = message.replace('>', '\n>')
+    message = '>' + message
+    print(message)
+    cmd = ['convert',
+           '-size',
+           '164x',
+           '-font',
+           '/usr/share/fonts/truetype/windows/arial.ttf',
+           '-pointsize',
+           '13',
+           '-fill',
+           '#789922',
+           '-background',
+           '#ffffee',
+           'caption:%s' % message,
+           filename]
+    try:
+        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        output = output.decode(encoding='UTF-8')
+        if output != '':
+            bot.send_message(event.conv, output)
+        imageID = yield from bot._client.upload_image(filename)
+        bot.send_image(event.conv, imageID)
+        os.remove(filename)
+    except subprocess.CalledProcessError as e:
+        output = e.output.decode(encoding='UTF-8')
+        if output != '':
+            bot.send_message(event.conv, output)
 
 @DispatcherSingleton.register
 def colour(bot, event, *args):

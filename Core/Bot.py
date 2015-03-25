@@ -258,14 +258,6 @@ class HangoutsBot(object):
         asyncio.async(
             conversation.send_message(None, imageID)
         ).add_done_callback(self._on_message_sent)
-        
-    def send_image_with_message(self, conversation, segments, imageID):
-        if len(segments) == 0:
-            segments = None
-        
-        asyncio.async(
-            conversation.send_message(segments, imageID)
-        ).add_done_callback(self._on_message_sent)
 
     def list_conversations(self):
         """List all active conversations"""

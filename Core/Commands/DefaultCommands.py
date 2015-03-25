@@ -15,7 +15,7 @@ from Core.Util import UtilBot
 
 clever_session = ChatterBotFactory().create(ChatterBotType.CLEVERBOT).create_session()
 last_recorded, last_recorder = None, None
-
+last_answer = {}
 
 @DispatcherSingleton.register_unknown
 def unknown_command(bot, event, *args):
@@ -28,6 +28,8 @@ def think(bot, event, *args):
     if clever_session:
         answer = clever_session.think(' '.join(args))
         answer = html.unescape(answer)
+        
+        last_answer[event.user_id] = event.timestamp
         yield from bot.send_message(event.conv, answer)
         
 @DispatcherSingleton.register_hidden
@@ -39,6 +41,14 @@ def cleanthink(bot, event, *args):
                 cleanargs.append(arg)
         
         yield from think(bot, event, *cleanargs)
+        
+@DispatcherSingleton.register_hidden
+def continuethink(bot, event, *args):
+    if clever_session:
+        if event.user_id in last_answer:
+            diff = last_anwser[event.user_id] - event.timestamp
+            if diff < 120:
+                yield from think(bot, event, *args)
 
 @DispatcherSingleton.register
 def help(bot, event, command=None, *args):

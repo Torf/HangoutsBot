@@ -2,6 +2,7 @@ import json
 from urllib import parse
 from urllib import request
 import re
+import html
 
 from bs4 import BeautifulSoup
 import hangups
@@ -29,7 +30,10 @@ def think(bot, event, *args):
         for arg in args:
             if arg not in bot.config['autoreplies'][0][0]:
                 cleanargs.append(arg)
-        yield from bot.send_message(event.conv, clever_session.think(' '.join(cleanargs)))
+                
+        answer = clever_session.think(' '.join(cleanargs))
+        answer = html.unescape(answer)
+        yield from bot.send_message(event.conv, answer)
 
 
 @DispatcherSingleton.register

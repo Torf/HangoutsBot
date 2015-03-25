@@ -15,7 +15,7 @@ import requests
 from Core.Commands.Dispatcher import DispatcherSingleton
 from Core.Util import UtilBot
 from Libraries import Genius
-from Libraries import RandomImgur
+from Libraries.random_imgur import RandomImgur
 import errno
 from glob import glob
 import subprocess

@@ -15,6 +15,7 @@ import requests
 from Core.Commands.Dispatcher import DispatcherSingleton
 from Core.Util import UtilBot
 from Libraries import Genius
+from Libraries import RandomImgur
 import errno
 from glob import glob
 import subprocess
@@ -56,6 +57,15 @@ def img(bot, event, *args):
                 with open(imageids_filename, 'w') as f:
                     json.dump(imageids, f, indent=2, sort_keys=True)
                 os.remove(filename)
+        bot.send_image(event.conv, imageID)
+
+@DispatcherSingleton.register
+def imgur(bot, event, *args):
+    randImgur = RandomImgur()
+    filename = 'output/' + randImgur.generate(1)[0]
+    imageID = yield from bot._client.upload_image(filename)
+    if not file_exception:
+        os.remove(filename)
         bot.send_image(event.conv, imageID)
 
 @DispatcherSingleton.register

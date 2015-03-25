@@ -61,13 +61,17 @@ def img(bot, event, *args):
 
 @DispatcherSingleton.register
 def imgur(bot, event, *args):
+    # get random imgur image
     randImgur = RandomImgur()
     filename = randImgur.generate(1)[0]
-    filepath = 'output/' + filename
+    filepath = 'output/'+filename
+    link_url = 'http://i.imgur.com/'+filename
+    # upload it
     imageID = yield from bot._client.upload_image(filepath)
     os.remove(filepath)
+    # send it
     bot.send_image(event.conv, imageID)
-    bot.send_message(event.conv, "http://i.imgur.com/%s"%filename)
+    bot.send_message_segments(event.conv, [hangups.ChatMessageSegment(link_url, hangups.SegmentType.LINK, link_target=link_url)])
 
 @DispatcherSingleton.register
 def count(bot, event, *args):

@@ -40,6 +40,7 @@ Purpose: Get the first result from YouTube\'s search using search parameter.
 """)
         bot.send_message_segments(event.conv, segments)
     else:
+        yield from bot.send_typing(event.conv)
         search_terms = " ".join(args)
         if search_terms == "" or search_terms == " ":
             search_terms = "Fabulous Secret Powers"

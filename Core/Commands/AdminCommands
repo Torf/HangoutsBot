@@ -1,0 +1,133 @@
+import json
+from urllib import parse
+from urllib import request
+import re
+import html
+import os
+
+from bs4 import BeautifulSoup
+import hangups
+from hangups.ui.utils import get_conv_name
+
+from Libraries.cleverbot import ChatterBotFactory, ChatterBotType
+from Core.Commands.Dispatcher import DispatcherSingleton
+from Core.Util import UtilBot
+
+@DispatcherSingleton.register_hidden
+def devmode(bot, event, *args):
+    """
+    *Development Mode:*
+    Usage: /devmode <on|off>
+    Purpose: When development mode is on, all outputted text will go to the Python console instead of the Hangouts chat.
+    """
+    if ''.join(args) == '?':
+        segments = [hangups.ChatMessageSegment('Development Mode', is_bold=True),
+                    hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
+                    hangups.ChatMessageSegment('Usage: /devmode <on|off>'),
+                    hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
+                    hangups.ChatMessageSegment(
+                        'Purpose: When development mode is on, all outputted text will go to the Python console instead of the Hangouts chat.')]
+        bot.send_message_segments(event.conv, segments)
+    else:
+        if ''.join(args) == "on":
+            bot.dev = True
+        else:
+            bot.dev = False
+
+@DispatcherSingleton.register_hidden
+def session(bot, event, *args):
+    if len(args) != 1:
+        return
+    if args[0] == 'save':
+        if clever_session:
+            filename = os.path.join('cleverbot', 'session.json')
+            clever_session.save_session(filename)
+            bot.send_message(event.conv, "Session saved.")
+        else:
+            bot.send_message(event.conv, "No session to save.")
+    elif args[0] == 'load':
+        filename = os.path.join('cleverbot', 'session.json')
+        clever_session.load_session(filename)
+        bot.send_message(event.conv, "Session loaded.")
+
+@DispatcherSingleton.register_hidden
+def ping(bot, event, *args):
+    """
+    *Ping:*
+    Usage: /ping
+    Purpose: Easy way to check if Bot is running.
+    """
+    bot.send_message(event.conv, 'pong')
+    
+@DispatcherSingleton.register
+def users(bot, event, *args):
+    """
+    *Users:*
+    Usage: /users
+    Purpose: Lists all users in the current conversations.
+    """
+    segments = [hangups.ChatMessageSegment('Users: '.format(len(event.conv.users)),
+                                           is_bold=True),
+                hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK)]
+    for user in sorted(event.conv.users, key=lambda x: x.full_name.split()[-1]):
+        link = 'https://plus.google.com/u/0/{}/about'.format(user.id_.chat_id)
+        segments.append(hangups.ChatMessageSegment(user.full_name, hangups.SegmentType.LINK,
+                                                   link_target=link))
+        if user.emails:
+            segments.append(hangups.ChatMessageSegment(' ('))
+            segments.append(hangups.ChatMessageSegment(user.emails[0], hangups.SegmentType.LINK,
+                                                       link_target='mailto:{}'.format(user.emails[0])))
+            segments.append(hangups.ChatMessageSegment(')'))
+
+        segments.append(hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK))
+    bot.send_message_segments(event.conv, segments)
+
+
+@DispatcherSingleton.register
+def user(bot, event, username, *args):
+    """
+    *User:*
+    Usage: /user <user name>
+    Purpose: Lists information about the specified user.
+    """
+    username_lower = username.strip().lower()
+    segments = [hangups.ChatMessageSegment('User: "{}":'.format(username),
+                                           is_bold=True),
+                hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK)]
+    for u in sorted(bot._user_list._user_dict.values(), key=lambda x: x.full_name.split()[-1]):
+        if not username_lower in u.full_name.lower():
+            continue
+
+        link = 'https://plus.google.com/u/0/{}/about'.format(u.id_.chat_id)
+        segments.append(hangups.ChatMessageSegment(u.full_name, hangups.SegmentType.LINK,
+                                                   link_target=link))
+        if u.emails:
+            segments.append(hangups.ChatMessageSegment(' ('))
+            segments.append(hangups.ChatMessageSegment(u.emails[0], hangups.SegmentType.LINK,
+                                                       link_target='mailto:{}'.format(u.emails[0])))
+            segments.append(hangups.ChatMessageSegment(')'))
+        segments.append(hangups.ChatMessageSegment(' ... {}'.format(u.id_.chat_id)))
+        segments.append(hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK))
+    bot.send_message_segments(event.conv, segments)
+    
+@DispatcherSingleton.register
+def hangouts(bot, event, *args):
+    """
+    *Hangouts:*
+    Usage: /hangouts
+    Purpose: Lists all Hangouts this Bot is currently in.
+    """
+    segments = [hangups.ChatMessageSegment('Currently In These Hangouts:', is_bold=True),
+                hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK)]
+    for c in bot.list_conversations():
+        s = '{} [commands: {:d}, forwarding: {:d}, autoreplies: {:d}]'.format(get_conv_name(c, truncate=True),
+                                                                              bot.get_config_suboption(c.id_,
+                                                                                                       'commands_enabled'),
+                                                                              bot.get_config_suboption(c.id_,
+                                                                                                       'forwarding_enabled'),
+                                                                              bot.get_config_suboption(c.id_,
+                                                                                                       'autoreplies_enabled'))
+        segments.append(hangups.ChatMessageSegment(s))
+        segments.append(hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK))
+
+    bot.send_message_segments(event.conv, segments)

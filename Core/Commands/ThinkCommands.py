@@ -31,7 +31,7 @@ def think(bot, event, *args):
 def wasSpeakingToBot(bot, event, *args, inputmsg):
     if event.user_id in last_answer and last_answer[event.user_id]:
         diff = last_answer[event.user_id] - event.timestamp
-        if diff.total_seconds() => 0 and diff.total_seconds() <= 480:
+        if diff.total_seconds() >= 0 and diff.total_seconds() <= 480:
             return True
         else:
             del last_answer[event.user_id]

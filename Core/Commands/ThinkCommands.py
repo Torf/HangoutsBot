@@ -73,12 +73,12 @@ def isSpeakingToBot(bot, inputmsg, *args):
     return False
 
 
-def sendAnswer(bot, event, inputmsg, attempts=3):
+def sendAnswer(bot, event, inputmsg, attempts=2):
     yield from bot.send_typing(event.conv)
     try:
         answer = bot.chatterbot.think(inputmsg)
     except Exception:
-        print('Cleverbot error : waiting until next attempt (%s attemps left)'%attempts)
+        print('Cleverbot error : waiting until next attempt (%s attempts left)'%attempts)
         time.sleep(10)
         if attempts > 0:
             yield from sendAnswer(bot, event, inputmsg, attempts - 1)

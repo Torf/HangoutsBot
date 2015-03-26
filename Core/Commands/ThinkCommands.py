@@ -21,14 +21,14 @@ def think(bot, event, *args):
     if bot.chatterbot and len(args) > 0:
         inputmsg = ' '.join(args)
         
-        if wasSpeakingToBot(bot, event, *args, inputmsg):
+        if wasSpeakingToBot(event):
             answer(bot, event, inputmsg)
         
-        elif isSpeakingToBot(bot, *args, inputmsg):
+        elif isSpeakingToBot(bot, inputmsg, *args):
             answer(bot, event, inputmsg)
 
 
-def wasSpeakingToBot(bot, event, *args, inputmsg):
+def wasSpeakingToBot(event):
     if event.user_id in last_answer and last_answer[event.user_id]:
         diff = last_answer[event.user_id] - event.timestamp
         if diff.total_seconds() >= 0 and diff.total_seconds() <= 480:
@@ -39,7 +39,7 @@ def wasSpeakingToBot(bot, event, *args, inputmsg):
     return False
 
 
-def isSpeakingToBot(bot, *args, inputmsg):
+def isSpeakingToBot(bot, inputmsg, *args):
     botName = bot.config['autoreplies_name'].lower()
     firstWord = args[0].lower()
     

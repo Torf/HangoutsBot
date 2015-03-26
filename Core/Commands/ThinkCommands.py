@@ -54,6 +54,7 @@ def isSpeakingToBot(bot, inputmsg, *args):
         if firstWord.startswith('@'+botName):
             return True
         else:
+            print('Nope %s' % firstWord.startswith('@'+botName))
             return False
             
     # Someone, blabla

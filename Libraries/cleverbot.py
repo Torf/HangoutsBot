@@ -127,6 +127,13 @@ class _CleverbotSession(ChatterBotSession):
         response_thought.text = _utils_string_at_index(response_values, 16)
         return response_thought
 
+    def save_session(self, filename):
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(self.vars, f, indent=2, sort_keys=True)
+    
+    def load_session(self, filename):
+        with open(filename, encoding='utf-8') as f:
+            self.vars = json.loads(f.read(), encoding='utf-8')
 
 # ################################################
 # Pandorabots impl

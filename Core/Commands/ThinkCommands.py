@@ -71,6 +71,7 @@ def isSpeakingToBot(bot, inputmsg, *args):
 
 
 def answer(bot, event, inputmsg):
+    yield from bot.send_typing(event.conv)
     answer = bot.chatterbot.think(inputmsg)
     last_answer[event.user_id] = event.timestamp
     yield from bot.send_message(event.conv, answer)

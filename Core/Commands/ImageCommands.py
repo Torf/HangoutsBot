@@ -27,6 +27,7 @@ def image(bot, event, *args):
 @DispatcherSingleton.register
 def img(bot, event, *args):
     if len(args) > 0:
+        yield from bot.send_typing(event.conv)
         url = args[0]
         file_exception = False
         try:
@@ -53,6 +54,7 @@ def img(bot, event, *args):
 
 @DispatcherSingleton.register
 def imgur(bot, event, *args):
+    yield from bot.send_typing(event.conv)
     # get random imgur image
     randImgur = RandomImgur()
     filename = randImgur.generate(1)[0]
@@ -72,6 +74,7 @@ def colour(bot, event, *args):
  
 @DispatcherSingleton.register
 def color(bot, event, *args):
+    yield from bot.send_typing(event.conv)
     filename = 'color.png'
     cmd = ['convert',
            '-size',

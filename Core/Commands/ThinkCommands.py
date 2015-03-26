@@ -30,8 +30,6 @@ def think(bot, event, *args):
         
         elif isSpeakingToBot(bot, inputmsg, *args):
             yield from sendAnswer(bot, event, inputmsg)
-        
-        print('end %s'%last_answer)
 
 
 def wasSpeakingToBot(event):
@@ -52,9 +50,9 @@ def isSpeakingToBot(bot, inputmsg, *args):
     # @someone blabla
     if firstWord.startswith('@'): 
         if firstWord.startswith('@'+botName):
+            args[0] = args[0]
             return True
         else:
-            print('Nope %s' % firstWord.startswith('@'+botName))
             return False
             
     # Someone, blabla

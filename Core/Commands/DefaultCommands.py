@@ -59,7 +59,7 @@ def continuethink(bot, event, *args):
 def stopthink(bot, event, *args):
     if clever_session:
         if event.user_id in last_answer:
-            last_answer.remove(event.user_id)
+            del last_answer[event.user_id]
 
 @DispatcherSingleton.register
 def help(bot, event, command=None, *args):

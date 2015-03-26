@@ -7,6 +7,7 @@ import os
 import string
 import unicodedata
 import sys
+import time
 
 from bs4 import BeautifulSoup
 import hangups
@@ -72,9 +73,16 @@ def isSpeakingToBot(bot, inputmsg, *args):
     return False
 
 
-def sendAnswer(bot, event, inputmsg):
+def sendAnswer(bot, event, inputmsg, attempts=3):
     yield from bot.send_typing(event.conv)
-    answer = bot.chatterbot.think(inputmsg)
+    try:
+        answer = bot.chatterbot.think(inputmsg)
+    except Exception:
+        print('Cleverbot error : waiting until next attempt (%s attemps left)'%attempts)
+        time.sleep(10)
+        if attempts > 0:
+            yield from sendAnswer(bot, event, inputmsg, attempts - 1)
+        return
     last_answer[event.user_id.gaia_id] = event.timestamp
     yield from bot.send_message(event.conv, answer)
 

@@ -92,7 +92,7 @@ def echo(bot, event, *args):
     """
     bot.send_message(event.conv, '{}'.format(' '.join(args)))
 
-@DispatcherSingleton.register
+@DispatcherSingleton.register_hidden
 def rename(bot, event, *args):
     """
     *Rename:*

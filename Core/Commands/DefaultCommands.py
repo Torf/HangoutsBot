@@ -77,13 +77,6 @@ def session(bot, event, *args):
         filename = os.path.join('cleverbot', 'session.json')
         clever_session.load_session(filename)
         bot.send_message("Session loaded.".format(command))
-        
-@DispatcherSingleton.register_hidden
-def savesession(bot, event, *args):
-    if clever_session:
-        filename = os.path.join('cleverbot', 'session.json')
-        clever_session.save_session(filename)
-        bot.send_message("Session saved.".format(command))
 
 @DispatcherSingleton.register
 def help(bot, event, command=None, *args):

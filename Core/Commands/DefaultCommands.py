@@ -21,6 +21,9 @@ def unknown_command(bot, event, *args):
     bot.send_message(event.conv,
                      '{}: Unknown command!'.format(event.user.full_name))
 
+@DispatcherSingleton.register_hidden
+def me(bot, event, *args):
+    pass
 
 @DispatcherSingleton.register_hidden
 def think(bot, event, *args):
@@ -184,126 +187,3 @@ def status(bot, event, *args):
                         'autoreplies_enabled'] else 'Disabled'))]
     bot.send_message_segments(event.conv, segments)
 
-@DispatcherSingleton.register
-def vote(bot, event, set_vote=None, *args):
-    if set_vote == '?':
-        segments = [hangups.ChatMessageSegment('Vote', is_bold=True),
-                    hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
-                    hangups.ChatMessageSegment('Usage: /vote <subject to vote on>'),
-                    hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
-                    hangups.ChatMessageSegment('Usage: /vote <yea|yes|for|nay|no|against (used to cast a vote)>'),
-                    hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
-                    hangups.ChatMessageSegment('Usage: /vote cancel'),
-                    hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
-                    hangups.ChatMessageSegment('Usage: /vote abstain'),
-                    hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
-                    hangups.ChatMessageSegment('Usage: /vote'),
-                    hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
-                    hangups.ChatMessageSegment(
-                        'Usage: /vote admin (used to start a vote for a new conversation admin)'),
-                    hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
-                    hangups.ChatMessageSegment('Purpose: Starts a vote in which a 50% majority wins.')]
-        bot.send_message_segments(event.conv, segments)
-    else:
-
-        # Abstains user from voting.
-        if set_vote is not None and set_vote.lower() == 'abstain':
-            if UtilBot.is_vote_started(event.conv_id):
-                bot.send_message(event.conv, 'User {} has abstained from voting.'.format(event.user.full_name))
-                if UtilBot.abstain_voter(event.conv_id, event.user.full_name):
-                    bot.send_message(event.conv, "The vote has ended because all voters have abstained.")
-                    return
-            else:
-                bot.send_message(event.conv, 'No vote currently in process to abstain from.')
-                return
-
-            # Check if the vote has ended
-            vote_result = UtilBot.check_if_vote_finished(event.conv_id)
-            if vote_result is not None:
-                if vote_result != 0:
-                    bot.send_message(event.conv,
-                                     'In the matter of: "' + UtilBot.get_vote_subject(event.conv_id) + '", the ' + (
-                                         'Yeas' if vote_result else 'Nays') + ' have it.')
-                else:
-                    bot.send_message(event.conv, "The vote ended in a tie in the matter of: {}".format(
-                        UtilBot.get_vote_subject(event.conv_id)))
-                UtilBot.end_vote(event.conv_id)
-            return
-
-        # Cancels the vote
-        if set_vote is not None and set_vote.lower() == "cancel":
-            if UtilBot.is_vote_started(event.conv_id):
-                bot.send_message(event.conv, 'Vote "{}" cancelled.'.format(UtilBot.get_vote_subject(event.conv_id)))
-                UtilBot.end_vote(event.conv_id)
-            else:
-                bot.send_message(event.conv, 'No vote currently started.')
-            return
-
-        # Starts a new vote
-        if not UtilBot.is_vote_started(event.conv_id) and set_vote is not None:
-            vote_subject = set_vote + ' ' + ' '.join(args)
-            vote_callback = None
-
-            # TODO Refactor this into a more easily extensible system.
-            if vote_subject.lower().strip() == "admin":  # For the special Conversation Admin case.
-
-                vote_subject = '{} for Conversation Admin for chat {}'.format(event.user.full_name,
-                                                                              get_conv_name(event.conv))
-
-                def set_conv_admin(won):
-                    if won:
-                        try:
-                            bot.config["conversations"][event.conv_id]["conversation_admin"] = event.user.id_[0]
-                        except (KeyError, TypeError):
-                            bot.config["conversations"][event.conv_id] = {}
-                            bot.config["conversations"][event.conv_id]["admin"] = event.user.id_[0]
-                        bot.config.save()
-
-                vote_callback = set_conv_admin
-
-            UtilBot.set_vote_subject(event.conv_id, vote_subject)
-            UtilBot.init_new_vote(event.conv_id, event.conv.users)
-            if vote_callback is not None:
-                UtilBot.set_vote_callback(event.conv_id, vote_callback)
-            bot.send_message(event.conv, "Vote started for subject: " + vote_subject)
-
-        # Cast a vote.
-        elif set_vote is not None:
-            if UtilBot.can_user_vote(event.conv_id, event.user):
-                set_vote = set_vote.lower()
-                if set_vote == "true" or set_vote == "yes" or set_vote == "yea" or set_vote == "for" or set_vote == "yay" or set_vote == "aye":
-                    UtilBot.set_vote(event.conv_id, event.user.full_name, True)
-                elif set_vote == "false" or set_vote == "no" or set_vote == "nay" or set_vote == "against":
-                    UtilBot.set_vote(event.conv_id, event.user.full_name, False)
-                else:
-                    bot.send_message(event.conv,
-                                     "{}, you did not enter a valid vote parameter.".format(event.user.full_name))
-                    return
-
-                # Check if the vote has ended
-                vote_result = UtilBot.check_if_vote_finished(event.conv_id)
-                if vote_result is not None:
-                    if vote_result != 0:
-                        bot.send_message(event.conv,
-                                         'In the matter of: "' + UtilBot.get_vote_subject(event.conv_id) + '", the ' + (
-                                             'Yeas' if vote_result > 0 else 'Nays') + ' have it.')
-                    else:
-                        bot.send_message(event.conv, "The vote ended in a tie in the matter of: {}".format(
-                            UtilBot.get_vote_subject(event.conv_id)))
-                    UtilBot.end_vote(event.conv_id, vote_result)
-                return
-            else:
-                bot.send_message(event.conv_id, 'User {} is not allowed to vote.'.format(event.user.full_name))
-                return
-
-        # Check the status of a vote.
-        else:
-            if UtilBot.is_vote_started(event.conv_id):
-                status = UtilBot.get_vote_status(event.conv_id)
-                if len(status) > 1:
-                    bot.send_message_segments(event.conv, UtilBot.text_to_segments('\n'.join(status)))
-                else:
-                    bot.send_message(event.conv, "No vote currently started.")
-            else:
-                bot.send_message(event.conv, "No vote currently started.")
-            return

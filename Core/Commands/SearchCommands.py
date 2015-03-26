@@ -29,6 +29,7 @@ def define(bot, event, *args):
     Usage: /define <word to search for> <start index and end index in form of int:int (e.g., /define test 1:3)>
     Purpose: Show definitions for a word.
     """
+    yield from bot.send_typing(event.conv)
     if args[-1].isdigit():
         definition, length = UtilBot.define(' '.join(args[0:-1]), num=int(args[-1]))
         segments = [hangups.ChatMessageSegment(' '.join(args[0:-1]).title(), is_bold=True),
@@ -99,7 +100,7 @@ def wiki(bot, event, *args):
     Purpose: Get summary from Wikipedia on keywords.
     """
     from wikipedia import wikipedia, PageError, DisambiguationError
-
+    yield from bot.send_typing(event.conv)
     def summary(self, sentences=3):
         if not getattr(self, '_summary', False):
             query_params = {
@@ -148,7 +149,7 @@ def goog(bot, event, *args):
     Usage: /goog <optional: search parameters>
     Purpose: Get a link to the first result from a Google search using the search parameters.
     """
-
+    yield from bot.send_typing(event.conv)
     search_terms = " ".join(args)
     if search_terms == "" or search_terms == " ":
         search_terms = "google"
@@ -178,6 +179,7 @@ Purpose: Define a word.
 """)
         bot.send_message_segments(event.conv, segments)
     else:
+        yield from bot.send_typing(event.conv)
         api_host = 'http://urbanscraper.herokuapp.com/search/'
         num_requested = 0
         returnall = False

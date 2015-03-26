@@ -246,7 +246,7 @@ class HangoutsBot(object):
     
     def send_message(self, conversation, text):
         """"Send simple chat message"""
-        self.send_message_segments(conversation, [hangups.ChatMessageSegment(text)])
+        yield from self.send_message_segments(conversation, [hangups.ChatMessageSegment(text)])
 
     def send_message_segments(self, conversation, segments):
         """Send chat message segments"""
@@ -258,6 +258,7 @@ class HangoutsBot(object):
         asyncio.async(
             conversation.send_message(segments)
         ).add_done_callback(self._on_message_sent)
+        yield
 
     def send_image(self, conversation, imageID):
         asyncio.async(

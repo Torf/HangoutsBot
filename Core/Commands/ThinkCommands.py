@@ -5,6 +5,8 @@ import re
 import html
 import os
 import string
+import unicodedata
+import sys
 
 from bs4 import BeautifulSoup
 import hangups
@@ -14,8 +16,9 @@ from Libraries.cleverbot import ChatterBotFactory, ChatterBotType
 from Core.Commands.Dispatcher import DispatcherSingleton
 from Core.Util import UtilBot
 
+punc_tbl = dict.fromkeys(i for i in range(sys.maxunicode)
+                      if unicodedata.category(chr(i)).startswith('P'))
 last_answer = {}
-transtable = string.maketrans("","")
 
 @DispatcherSingleton.register_hidden
 def think(bot, event, *args):
@@ -60,7 +63,7 @@ def isSpeakingToBot(bot, inputmsg, *args):
     if botName not in cleanmsg:
         return False
     
-    cleanmsg = cleanmsg.translate(transtable, string.punctuation).strip()
+    cleanmsg = remove_punctuation(cleanmsg).strip()
     if cleanmsg.endswith(botName):
         return True
     
@@ -81,3 +84,6 @@ def stopthink(bot, event, *args):
     if bot.chatterbot:
         if event.user_id in last_answer:
             del last_answer[event.user_id]
+
+def remove_punctuation(text):
+    return text.translate(punc_tbl)

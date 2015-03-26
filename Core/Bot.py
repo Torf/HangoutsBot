@@ -11,6 +11,7 @@ import traceback
 import hangups
 from hangups.ui.utils import get_conv_name
 from Core.Commands.Dispatcher import DispatcherSingleton
+from Libraries.cleverbot import ChatterBotFactory, ChatterBotType
 
 from Core.Util import ConfigDict
 from Core import Handlers

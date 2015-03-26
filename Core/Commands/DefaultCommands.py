@@ -13,8 +13,6 @@ from Libraries.cleverbot import ChatterBotFactory, ChatterBotType
 from Core.Commands.Dispatcher import DispatcherSingleton
 from Core.Util import UtilBot
 
-
-clever_session = ChatterBotFactory().create(ChatterBotType.CLEVERBOT).create_session()
 last_recorded, last_recorder = None, None
 last_answer = {}
 
@@ -26,16 +24,16 @@ def unknown_command(bot, event, *args):
 
 @DispatcherSingleton.register_hidden
 def think(bot, event, *args):
-    if clever_session:
-        answer = clever_session.think(' '.join(args))
-        answer = html.unescape(answer)
+    if bot.chatterbot:
+        inputmsg = ' '.join(args)
+        answer = bot.chatterbot.think(inputmsg)
         
         last_answer[event.user_id] = event.timestamp
         yield from bot.send_message(event.conv, answer)
         
 @DispatcherSingleton.register_hidden
 def cleanthink(bot, event, *args):
-    if clever_session:
+    if bot.chatterbot:
         cleanargs = []
         for arg in args:
             if arg.lower() != bot.config['autoreplies_name']:
@@ -45,7 +43,7 @@ def cleanthink(bot, event, *args):
         
 @DispatcherSingleton.register_hidden
 def continuethink(bot, event, *args):
-    if clever_session:
+    if bot.chatterbot:
         if event.user_id in last_answer:
             if last_answer[event.user_id] == event.timestamp:
                 for arg in args:
@@ -58,7 +56,7 @@ def continuethink(bot, event, *args):
 
 @DispatcherSingleton.register_hidden
 def stopthink(bot, event, *args):
-    if clever_session:
+    if bot.chatterbot:
         if event.user_id in last_answer:
             del last_answer[event.user_id]
 

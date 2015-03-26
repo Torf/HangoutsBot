@@ -33,12 +33,6 @@ def backtable(bot, event, *args):
 def lenny(bot, event, *args):
     bot.send_message(event.conv, '( ͡° ͜ʖ ͡°)')
 
-
-
-@DispatcherSingleton.register
-def trash(bot, event, *args):
-    bot.send_message(event.conv, "🚮")
-
 @DispatcherSingleton.register
 def navyseals(bot, event, *args):
      if ''.join(args) == '?':

@@ -70,13 +70,13 @@ def session(bot, event, *args):
         if clever_session:
             filename = os.path.join('cleverbot', 'session.json')
             clever_session.save_session(filename)
-            bot.send_message("Session saved.")
+            bot.send_message(event.conv, "Session saved.")
         else:
-            bot.send_message("No session to save.")
+            bot.send_message(event.conv, "No session to save.")
     elif args[0] == 'load':
         filename = os.path.join('cleverbot', 'session.json')
         clever_session.load_session(filename)
-        bot.send_message("Session loaded.")
+        bot.send_message(event.conv, "Session loaded.")
 
 @DispatcherSingleton.register
 def help(bot, event, command=None, *args):

@@ -3,6 +3,7 @@ from urllib import parse
 from urllib import request
 import re
 import html
+import os
 
 from bs4 import BeautifulSoup
 import hangups
@@ -60,6 +61,29 @@ def stopthink(bot, event, *args):
     if clever_session:
         if event.user_id in last_answer:
             del last_answer[event.user_id]
+
+@DispatcherSingleton.register_hidden
+def session(bot, event, *args):
+    if len(args) != 1:
+        return
+    if args[0] == 'save':
+        if clever_session:
+            filename = os.path.join('cleverbot', 'session.json')
+            clever_session.save_session(filename)
+            bot.send_message("Session saved.".format(command))
+        else:
+            bot.send_message("No session to save.".format(command))
+    elif args[0] == 'load':
+        filename = os.path.join('cleverbot', 'session.json')
+        clever_session.load_session(filename)
+        bot.send_message("Session loaded.".format(command))
+        
+@DispatcherSingleton.register_hidden
+def savesession(bot, event, *args):
+    if clever_session:
+        filename = os.path.join('cleverbot', 'session.json')
+        clever_session.save_session(filename)
+        bot.send_message("Session saved.".format(command))
 
 @DispatcherSingleton.register
 def help(bot, event, command=None, *args):

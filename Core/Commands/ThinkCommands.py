@@ -24,12 +24,14 @@ last_answer = {}
 def think(bot, event, *args):
     if bot.chatterbot and len(args) > 0:
         inputmsg = ' '.join(args)
-        
+        print('inputmsg:%s'%inputmsg)
         if wasSpeakingToBot(event):
             answer(bot, event, inputmsg)
         
         elif isSpeakingToBot(bot, inputmsg, *args):
             answer(bot, event, inputmsg)
+        
+        print('end %s'%last_answer)
 
 
 def wasSpeakingToBot(event):
@@ -46,7 +48,7 @@ def wasSpeakingToBot(event):
 def isSpeakingToBot(bot, inputmsg, *args):
     botName = bot.config['autoreplies_name'].lower()
     firstWord = args[0].lower()
-    
+    print('botName:%s  -  firstWord:%s'%(botName, firstWord))
     # @someone blabla
     if firstWord.startswith('@'): 
         if firstWord.startswith('@'+botName):
@@ -62,11 +64,11 @@ def isSpeakingToBot(bot, inputmsg, *args):
     cleanmsg = inputmsg.lower()
     if botName not in cleanmsg:
         return False
-    
+    print('cleanmsg:%s'%cleanmsg)
     cleanmsg = remove_punctuation(cleanmsg).strip()
     if cleanmsg.endswith(botName):
         return True
-    
+    print('cleanmsg:%s'%cleanmsg)
     return False
 
 

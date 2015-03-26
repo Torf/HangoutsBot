@@ -224,19 +224,19 @@ class HangoutsBot(object):
         if DispatcherSingleton.commands['record']:
             if event.conv_event.new_name == '':
                 text = "Name cleared"
-                directory = "Records" + "\\" + str(event.conv_id)
+                directory = os.path.join("Records", str(event.conv_id))
                 if not os.path.exists(directory):
                     os.makedirs(directory)
                 filename = str(date.today()) + ".txt"
-                file = open(directory + '\\' + filename, "a+")
+                file = open(os.path.join(directory, filename), "a+")
                 file.write(text + '\n')
             else:
                 text = "Name changed to: " + conv_event.new_name
-                directory = "Records" + "\\" + str(event.conv_id)
+                directory = os.path.join("Records", str(event.conv_id))
                 if not os.path.exists(directory):
                     os.makedirs(directory)
                 filename = str(date.today()) + ".txt"
-                file = open(directory + '\\' + filename, "a+")
+                file = open(os.path.join(directory, filename), "a+")
                 file.write(text + '\n')
 
     def send_message(self, conversation, text):

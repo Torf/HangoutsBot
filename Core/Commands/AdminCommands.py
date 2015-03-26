@@ -1,4 +1,5 @@
 import json
+import imp
 from urllib import parse
 from urllib import request
 import re
@@ -170,7 +171,31 @@ def reload(bot, event, *args):
         bot.send_message_segments(event.conv, segments)
     else:
         bot.config.load()
-        
+
+@DispatcherSingleton.register_hidden
+def update(bot, event, *args):
+    """
+    *Update:*
+    Usage: /update <filename.py>
+    Purpose: Reloads the given module.
+    """
+    if len(args) != 1:
+        return
+    
+    name = args[0]
+    try:
+        fp, pathname, description = imp.find_module(name)
+    except ImportError:
+        bot.send_message(event.conv, "unable to locate module " + name)
+        return
+ 
+    try:
+        example_package = imp.load_module(name, fp, pathname, description)
+    except Exception, e:
+        bot.send_message(event.conv, "unable to update module " + name)
+    
+    bot.send_message(event.conv, "successfully update module " + name)
+
 @DispatcherSingleton.register_hidden
 def quit(bot, event, *args):
     """

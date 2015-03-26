@@ -24,7 +24,7 @@ last_answer = {}
 def think(bot, event, *args):
     if bot.chatterbot and len(args) > 0:
         inputmsg = ' '.join(args)
-        print('inputmsg:%s'%inputmsg)
+        print('inputmsg:%s, last_answer:%s'%(inputmsg,last_answer))
         if wasSpeakingToBot(event):
             yield from sendAnswer(bot, event, inputmsg)
         

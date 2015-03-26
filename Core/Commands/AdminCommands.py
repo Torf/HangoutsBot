@@ -39,15 +39,15 @@ def session(bot, event, *args):
     if len(args) != 1:
         return
     if args[0] == 'save':
-        if clever_session:
+        if bot.chatterbot:
             filename = os.path.join('cleverbot', 'session.json')
-            clever_session.save_session(filename)
+            bot.chatterbot.save_session(filename)
             bot.send_message(event.conv, "Session saved.")
         else:
             bot.send_message(event.conv, "No session to save.")
     elif args[0] == 'load':
         filename = os.path.join('cleverbot', 'session.json')
-        clever_session.load_session(filename)
+        bot.chatterbot.load_session(filename)
         bot.send_message(event.conv, "Session loaded.")
 
 @DispatcherSingleton.register_hidden

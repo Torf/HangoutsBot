@@ -173,30 +173,6 @@ def reload(bot, event, *args):
         bot.config.load()
 
 @DispatcherSingleton.register_hidden
-def update(bot, event, *args):
-    """
-    *Update:*
-    Usage: /update <filename.py>
-    Purpose: Reloads the given module.
-    """
-    if len(args) != 1:
-        return
-    
-    name = args[0]
-    try:
-        fp, pathname, description = imp.find_module(name, [ os.path.abspath('./Core/Commands/') ])
-    except ImportError:
-        bot.send_message(event.conv, "unable to locate module " + name)
-        return
- 
-    try:
-        example_package = imp.load_module(name, fp, pathname, description)
-    except Exception:
-        bot.send_message(event.conv, "unable to update module " + name)
-    
-    bot.send_message(event.conv, "successfully update module " + name)
-
-@DispatcherSingleton.register_hidden
 def quit(bot, event, *args):
     """
     *Quit:*

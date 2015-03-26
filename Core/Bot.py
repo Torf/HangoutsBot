@@ -81,6 +81,7 @@ class HangoutsBot(object):
         # Load config file
         self.config = ConfigDict.ConfigDict(config_path)
         self.devmode = self.get_config_suboption('', 'development_mode')
+        self.chatterbot = ChatterBotFactory().create(ChatterBotType.CLEVERBOT).create_session()
 
         # Handle signals on Unix
         # (add_signal_handler is not implemented on Windows)

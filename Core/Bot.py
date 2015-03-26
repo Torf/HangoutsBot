@@ -240,7 +240,10 @@ class HangoutsBot(object):
                 filename = str(date.today()) + ".txt"
                 file = open(os.path.join(directory, filename), "a+")
                 file.write(text + '\n')
-
+    
+    def send_typing(self, conversation):
+      self._client.settyping(conv.id_)
+    
     def send_message(self, conversation, text):
         """"Send simple chat message"""
         self.send_message_segments(conversation, [hangups.ChatMessageSegment(text)])

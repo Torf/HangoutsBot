@@ -5,6 +5,7 @@ from urllib import parse
 import urllib
 import uuid
 import xml.dom.minidom
+import html
 
 """
     chatterbotapi
@@ -125,8 +126,11 @@ class _CleverbotSession(ChatterBotSession):
         self.vars['typingData'] = _utils_string_at_index(response_values, 22)
         self.vars['divert'] = _utils_string_at_index(response_values, 23)
         response_thought = ChatterBotThought()
-        response_thought.text = _utils_string_at_index(response_values, 16)
+        response_thought.text = self.clean_text(_utils_string_at_index(response_values, 16))
         return response_thought
+
+    def clean_text(self, text):
+        return html.unescape(text)
 
     def save_session(self, filename):
         with open(filename, 'w', encoding='utf-8') as f:

@@ -110,7 +110,7 @@ def user(bot, event, username, *args):
         segments.append(hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK))
     bot.send_message_segments(event.conv, segments)
     
-@DispatcherSingleton.register
+@DispatcherSingleton.register_hidden
 def hangouts(bot, event, *args):
     """
     *Hangouts:*
@@ -131,3 +131,111 @@ def hangouts(bot, event, *args):
         segments.append(hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK))
 
     bot.send_message_segments(event.conv, segments)
+
+@DispatcherSingleton.register_hidden
+def leave(bot, event, conversation=None, *args):
+    """
+    *Leave:*
+    Usage: /leave
+    **Purpose: Leaves the chat room.**
+    """
+    convs = []
+    if not conversation:
+        convs.append(event.conv)
+    else:
+        conversation = conversation.strip().lower()
+        for c in bot.list_conversations():
+            if conversation in get_conv_name(c, truncate=True).lower():
+                convs.append(c)
+
+    for c in convs:
+        yield from c.send_message([
+            hangups.ChatMessageSegment('I\'ll be back!')
+        ])
+        yield from bot._conv_list.leave_conversation(c.id_)
+
+@DispatcherSingleton.register_hidden
+def reload(bot, event, *args):
+    """
+    *Reload:*
+    Usage: /reload
+    Purpose: Reloads the current config file into memory.
+    """
+    if ''.join(args) == '?':
+        segments = [hangups.ChatMessageSegment('Reload', is_bold=True),
+                    hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
+                    hangups.ChatMessageSegment('Usage: /reload'),
+                    hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
+                    hangups.ChatMessageSegment('Purpose: Reloads current config file.')]
+        bot.send_message_segments(event.conv, segments)
+    else:
+        bot.config.load()
+        
+@DispatcherSingleton.register_hidden
+def quit(bot, event, *args):
+    """
+    *Quit:*
+    Usage: /quit
+    Purpose: Closes the Bot.
+    """
+    print('HangupsBot killed by user {} from conversation {}'.format(event.user.full_name,
+                                                                     get_conv_name(event.conv, truncate=True)))
+    yield from bot._client.disconnect()
+    
+@DispatcherSingleton.register_hidden
+def config(bot, event, cmd=None, *args):
+    if cmd == 'get' or cmd is None:
+        config_args = list(args)
+        value = bot.config.get_by_path(config_args) if config_args else dict(bot.config)
+    elif cmd == 'set':
+        config_args = list(args[:-1])
+        if len(args) >= 2:
+            bot.config.set_by_path(config_args, json.loads(args[-1]))
+            bot.config.save()
+            value = bot.config.get_by_path(config_args)
+        else:
+            yield from DispatcherSingleton.unknown_command(bot, event)
+            return
+    else:
+        yield from DispatcherSingleton.unknown_command(bot, event)
+        return
+
+    if value is None:
+        value = 'Parameter does not exist!'
+
+    config_path = ' '.join(k for k in ['config'] + config_args)
+    segments = [hangups.ChatMessageSegment('{}:'.format(config_path),
+                                           is_bold=True),
+                hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK)]
+    segments.extend(UtilBot.text_to_segments(json.dumps(value, indent=2, sort_keys=True)))
+    bot.send_message_segments(event.conv, segments)
+
+
+@DispatcherSingleton.register_hidden
+def block(bot, event, username=None, *args):
+    if not username:
+        segments = [hangups.ChatMessageSegment("Blocked Users: ", is_bold=True),
+                    hangups.ChatMessageSegment("\n", segment_type=hangups.SegmentType.LINE_BREAK),
+                    hangups.ChatMessageSegment("No users blocked.")]
+        if len(UtilBot.get_blocked_users_in_conversations(event.conv_id)) > 0:
+            segments.pop()
+            for user in event.conv.users:
+                if UtilBot.is_user_blocked(event.conv_id, user.id_):
+                    segments.append(hangups.ChatMessageSegment(user.full_name))
+                    segments.append(hangups.ChatMessageSegment("\n", segment_type=hangups.SegmentType.LINE_BREAK))
+            segments.pop()
+        bot.send_message_segments(event.conv, segments)
+        return
+    username_lower = username.strip().lower()
+    for u in sorted(event.conv.users, key=lambda x: x.full_name.split()[-1]):
+        if not username_lower in u.full_name.lower() or event.user.is_self:
+            continue
+
+        if UtilBot.is_user_blocked(event.conv_id, u.id_):
+            UtilBot.remove_from_blocklist(event.conv_id, u.id_)
+            bot.send_message(event.conv, "Unblocked User: {}".format(u.full_name))
+            return
+        UtilBot.add_to_blocklist(event.conv_id, u.id_)
+        bot.send_message(event.conv, "Blocked User: {}".format(u.full_name))
+        return
+

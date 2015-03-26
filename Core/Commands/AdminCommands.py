@@ -184,7 +184,7 @@ def update(bot, event, *args):
     
     name = args[0]
     try:
-        fp, pathname, description = imp.find_module(name, [ os.path.abspath('./') ])
+        fp, pathname, description = imp.find_module(name, [ os.path.abspath('./Core/Commands/') ])
     except ImportError:
         bot.send_message(event.conv, "unable to locate module " + name)
         return

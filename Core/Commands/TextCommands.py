@@ -26,8 +26,14 @@ def fliptable(bot, event, *args):
     bot.send_message(event.conv, '(╯°□°）╯︵ ┻━┻')
     
 @DispatcherSingleton.register
+def backtable(bot, event, *args):
+    bot.send_message(event.conv, '┬─┬ノ( º _ ºノ)')
+    
+@DispatcherSingleton.register
 def lenny(bot, event, *args):
     bot.send_message(event.conv, '( ͡° ͜ʖ ͡°)')
+
+
 
 @DispatcherSingleton.register
 def trash(bot, event, *args):

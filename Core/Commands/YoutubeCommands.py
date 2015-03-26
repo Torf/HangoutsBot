@@ -19,9 +19,7 @@ from Libraries.random_imgur import RandomImgur
 import errno
 from glob import glob
 import subprocess
-from .fliptextdict import fliptextdict
 from .youtube_banlist import youtube_banlist
-
 
 @DispatcherSingleton.register
 def yt(bot, event, *args):
@@ -30,20 +28,6 @@ def yt(bot, event, *args):
 @DispatcherSingleton.register
 def YouTube(bot, event, *args):
     youtube(bot, event, *args)
-    
-@DispatcherSingleton.register
-def xfiles(bot, event, *args):
-    if ''.join(args) == '?':
-        segments = UtilBot.text_to_segments("""\
-*xfiles*
-Usage: /xfiles
-Purpose: but what if bot is not kill
-""")
-        bot.send_message_segments(event.conv, segments)
-    else:
-        args = ['xfiles','theme']
-        youtube(bot, event, *args)
-    
 
 @DispatcherSingleton.register
 def youtube(bot, event, *args):

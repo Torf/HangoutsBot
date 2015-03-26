@@ -4,6 +4,7 @@ from urllib import request
 import re
 import html
 import os
+import string
 
 from bs4 import BeautifulSoup
 import hangups

@@ -24,7 +24,7 @@ from .youtube_banlist import youtube_banlist
 
 reminders = []
 
-@DispatcherSingleton.register
+@DispatcherSingleton.register_hidden
 def me(bot, event, *args):
     pass
 

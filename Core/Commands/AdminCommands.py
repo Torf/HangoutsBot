@@ -191,7 +191,7 @@ def update(bot, event, *args):
  
     try:
         example_package = imp.load_module(name, fp, pathname, description)
-    except Exception, e:
+    except Exception:
         bot.send_message(event.conv, "unable to update module " + name)
     
     bot.send_message(event.conv, "successfully update module " + name)

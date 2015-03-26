@@ -55,6 +55,12 @@ def continuethink(bot, event, *args):
             if diff.total_seconds() < 120:
                 yield from think(bot, event, *args)
 
+@DispatcherSingleton.register_hidden
+def stopthink(bot, event, *args):
+    if clever_session:
+        if event.user_id in last_answer:
+            last_answer.remove(event.user_id)
+
 @DispatcherSingleton.register
 def help(bot, event, command=None, *args):
     docstring = """

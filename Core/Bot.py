@@ -242,7 +242,7 @@ class HangoutsBot(object):
                 file.write(text + '\n')
     
     def send_typing(self, conversation):
-      self._client.settyping(conv.id_)
+      self._client.settyping(conversation.id_)
     
     def send_message(self, conversation, text):
         """"Send simple chat message"""

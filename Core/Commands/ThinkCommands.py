@@ -26,10 +26,10 @@ def think(bot, event, *args):
         inputmsg = ' '.join(args)
         print('inputmsg:%s'%inputmsg)
         if wasSpeakingToBot(event):
-            answer(bot, event, inputmsg)
+            yield from sendAnswer(bot, event, inputmsg)
         
         elif isSpeakingToBot(bot, inputmsg, *args):
-            answer(bot, event, inputmsg)
+            yield from sendAnswer(bot, event, inputmsg)
         
         print('end %s'%last_answer)
 
@@ -73,7 +73,7 @@ def isSpeakingToBot(bot, inputmsg, *args):
     return False
 
 
-def answer(bot, event, inputmsg):
+def sendAnswer(bot, event, inputmsg):
     yield from bot.send_typing(event.conv)
     answer = bot.chatterbot.think(inputmsg)
     last_answer[event.user_id] = event.timestamp

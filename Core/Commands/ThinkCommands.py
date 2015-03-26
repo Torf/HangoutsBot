@@ -33,12 +33,12 @@ def think(bot, event, *args):
 
 
 def wasSpeakingToBot(event):
-    if event.user_id in last_answer and last_answer[event.user_id]:
-        diff = last_answer[event.user_id] - event.timestamp
+    if event.user_id.gaia_id in last_answer and last_answer[event.user_id.gaia_id]:
+        diff = last_answer[event.user_id.gaia_id] - event.timestamp
         if diff.total_seconds() >= 0 and diff.total_seconds() <= 480:
             return True
         else:
-            del last_answer[event.user_id]
+            del last_answer[event.user_id.gaia_id]
     
     return False
 
@@ -73,7 +73,7 @@ def isSpeakingToBot(bot, inputmsg, *args):
 def sendAnswer(bot, event, inputmsg):
     yield from bot.send_typing(event.conv)
     answer = bot.chatterbot.think(inputmsg)
-    last_answer[event.user_id] = event.timestamp
+    last_answer[event.user_id.gaia_id] = event.timestamp
     yield from bot.send_message(event.conv, answer)
 
 @DispatcherSingleton.register_hidden
@@ -83,8 +83,8 @@ def taggle(bot, event, *args):
 @DispatcherSingleton.register_hidden
 def stopthink(bot, event, *args):
     if bot.chatterbot:
-        if event.user_id in last_answer:
-            del last_answer[event.user_id]
+        if event.user_id.gaia_id in last_answer:
+            del last_answer[event.user_id.gaia_id]
 
 def remove_punctuation(text):
     return text.translate(punc_tbl)

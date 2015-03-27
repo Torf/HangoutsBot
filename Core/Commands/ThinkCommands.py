@@ -27,14 +27,14 @@ def think(bot, event, *args):
     if bot.chatterbot and len(args) > 0:
         inputmsg = ' '.join(args)
         
-        if wasSpeakingToBot(event):
+        if wasSpeakingToBot(bot, event):
             yield from sendAnswer(bot, event, inputmsg)
         
         elif isSpeakingToBot(bot, inputmsg, *args):
             yield from sendAnswer(bot, event, inputmsg)
 
 
-def wasSpeakingToBot(event):
+def wasSpeakingToBot(bot, event):
     if event.user_id.gaia_id in last_answer and last_answer[event.user_id.gaia_id]:
         diff = event.timestamp - last_answer[event.user_id.gaia_id]
         

@@ -19,13 +19,14 @@ from Core.Util import UtilBot
 
 punc_tbl = dict.fromkeys(i for i in range(sys.maxunicode)
                       if unicodedata.category(chr(i)).startswith('P'))
+banned_word_regex = re.compile('Cleverbot', re.IGNORECASE)
 last_answer = {}
 
 @DispatcherSingleton.register_hidden
 def think(bot, event, *args):
     if bot.chatterbot and len(args) > 0:
         inputmsg = ' '.join(args)
-        print('inputmsg:%s, last_answer:%s'%(inputmsg,last_answer))
+        
         if wasSpeakingToBot(event):
             yield from sendAnswer(bot, event, inputmsg)
         
@@ -49,7 +50,7 @@ def wasSpeakingToBot(event):
 def isSpeakingToBot(bot, inputmsg, *args):
     botName = bot.config['autoreplies_name'].lower()
     firstWord = args[0].lower()
-    print('botName:%s  -  firstWord:%s'%(botName, firstWord))
+    
     # @someone blabla
     if firstWord.startswith('@'): 
         if firstWord.startswith('@'+botName):
@@ -65,11 +66,11 @@ def isSpeakingToBot(bot, inputmsg, *args):
     cleanmsg = inputmsg.lower()
     if botName not in cleanmsg:
         return False
-    print('cleanmsg:%s'%cleanmsg)
+        
     cleanmsg = remove_punctuation(cleanmsg).strip()
     if cleanmsg.endswith(botName):
         return True
-    print('cleanmsg:%s'%cleanmsg)
+    
     return False
 
 
@@ -84,7 +85,7 @@ def sendAnswer(bot, event, inputmsg, attempts=2):
             yield from sendAnswer(bot, event, inputmsg, attempts - 1)
         return
     last_answer[event.user_id.gaia_id] = event.timestamp
-    yield from bot.send_message(event.conv, answer)
+    yield from bot.send_message(event.conv, filter_banned_word(bot, answer))
 
 @DispatcherSingleton.register_hidden
 def taggle(bot, event, *args):
@@ -98,3 +99,6 @@ def stopthink(bot, event, *args):
 
 def remove_punctuation(text):
     return text.translate(punc_tbl)
+
+def filter_banned_word(bot, text):
+    return banned_word_regex.sub(bot.config['autoreplies_name'], text)

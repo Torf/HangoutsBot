@@ -322,7 +322,7 @@ class HangoutsBot(object):
             except KeyError:
                 welcome_enabled = False
             if welcome_enabled:
-                yield from self.send_message(c, msg)
+                self.send_message_segments(c, [hangups.ChatMessageSegment(msg)])
 
     def _on_event(self, conv_event):
         """Handle conversation events"""

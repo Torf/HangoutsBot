@@ -46,7 +46,10 @@ class MessageHandler(object):
         """Handle conversation event"""
         if logging.root.level == logging.DEBUG:
             event.print_debug()
-
+        
+        # send READ watermark
+        yield from self.bot._client.updatewatermark(event.conv_id, event.timestamp)
+        
         if not event.user.is_self and event.text:
             if event.text.startswith(self.command_char):
                 # Run command

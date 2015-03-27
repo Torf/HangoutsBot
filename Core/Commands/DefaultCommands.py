@@ -17,8 +17,7 @@ last_recorded, last_recorder = None, None
 
 @DispatcherSingleton.register_unknown
 def unknown_command(bot, event, *args):
-    bot.send_message(event.conv,
-                     '{}: Unknown command!'.format(event.user.full_name))
+    yield from bot.send_message(event.conv, '{}: Unknown command!'.format(event.user.full_name))
 
 @DispatcherSingleton.register_hidden
 def me(bot, event, *args):
@@ -32,17 +31,17 @@ def help(bot, event, command=None, *args):
     Use: /<command name> ? or /help <command name> to find more information about the command.
     """.format(', '.join(sorted(DispatcherSingleton.commands.keys())))
     if command == '?' or command is None:
-        bot.send_message_segments(event.conv, UtilBot.text_to_segments(docstring))
+        yield from bot.send_message_segments(event.conv, UtilBot.text_to_segments(docstring))
     else:
         if command in DispatcherSingleton.commands.keys():
             func = DispatcherSingleton.commands[command]
             if func.__doc__:
-                bot.send_message_segments(event.conv, UtilBot.text_to_segments(func.__doc__))
+                yield from bot.send_message_segments(event.conv, UtilBot.text_to_segments(func.__doc__))
             else:  # Compatibility purposes for the old way of showing help text.
                 args = ['?']
-                func(bot, event, *args)
+                yield from func(bot, event, *args)
         else:
-            bot.send_message("The command {} is not registered.".format(command))
+            yield from bot.send_message("The command {} is not registered.".format(command))
 
 @DispatcherSingleton.register
 def echo(bot, event, *args):
@@ -51,7 +50,7 @@ def echo(bot, event, *args):
     Usage: /echo <text to echo>
     Purpose: Bot will echo the inputted text.
     """
-    bot.send_message(event.conv, '{}'.format(' '.join(args)))
+    yield from bot.send_message(event.conv, '{}'.format(' '.join(args)))
 
 @DispatcherSingleton.register_hidden
 def rename(bot, event, *args):
@@ -95,7 +94,7 @@ def clear(bot, event, *args):
                 hangups.ChatMessageSegment('Intentionally not displayed.', hangups.SegmentType.LINE_BREAK),
                 hangups.ChatMessageSegment('Intentionally not displayed.', hangups.SegmentType.LINE_BREAK),
                 hangups.ChatMessageSegment('Intentionally not displayed.', hangups.SegmentType.LINE_BREAK)]
-    bot.send_message_segments(event.conv, segments)
+    yield from bot.send_message_segments(event.conv, segments)
 
 @DispatcherSingleton.register
 def mute(bot, event, *args):
@@ -146,5 +145,5 @@ def status(bot, event, *args):
                 hangups.ChatMessageSegment(
                     'Autoreplies: ' + ('Enabled' if bot.config['conversations'][event.conv_id][
                         'autoreplies_enabled'] else 'Disabled'))]
-    bot.send_message_segments(event.conv, segments)
+    yield from bot.send_message_segments(event.conv, segments)
 

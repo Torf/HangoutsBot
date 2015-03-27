@@ -28,7 +28,7 @@ def devmode(bot, event, *args):
                     hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
                     hangups.ChatMessageSegment(
                         'Purpose: When development mode is on, all outputted text will go to the Python console instead of the Hangouts chat.')]
-        bot.send_message_segments(event.conv, segments)
+        yield from bot.send_message_segments(event.conv, segments)
     else:
         if ''.join(args) == "on":
             bot.dev = True
@@ -43,13 +43,13 @@ def session(bot, event, *args):
         if bot.chatterbot:
             filename = os.path.join('cleverbot', 'session.json')
             bot.chatterbot.save_session(filename)
-            bot.send_message(event.conv, "Session saved.")
+            yield from bot.send_message(event.conv, "Session saved.")
         else:
-            bot.send_message(event.conv, "No session to save.")
+            yield from bot.send_message(event.conv, "No session to save.")
     elif args[0] == 'load':
         filename = os.path.join('cleverbot', 'session.json')
         bot.chatterbot.load_session(filename)
-        bot.send_message(event.conv, "Session loaded.")
+        yield from bot.send_message(event.conv, "Session loaded.")
 
 @DispatcherSingleton.register_hidden
 def ping(bot, event, *args):
@@ -58,7 +58,7 @@ def ping(bot, event, *args):
     Usage: /ping
     Purpose: Easy way to check if Bot is running.
     """
-    bot.send_message(event.conv, 'pong')
+    yield from bot.send_message(event.conv, 'pong')
     
 @DispatcherSingleton.register
 def users(bot, event, *args):
@@ -81,7 +81,7 @@ def users(bot, event, *args):
             segments.append(hangups.ChatMessageSegment(')'))
 
         segments.append(hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK))
-    bot.send_message_segments(event.conv, segments)
+    yield from bot.send_message_segments(event.conv, segments)
 
 
 @DispatcherSingleton.register
@@ -109,7 +109,7 @@ def user(bot, event, username, *args):
             segments.append(hangups.ChatMessageSegment(')'))
         segments.append(hangups.ChatMessageSegment(' ... {}'.format(u.id_.chat_id)))
         segments.append(hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK))
-    bot.send_message_segments(event.conv, segments)
+    yield from bot.send_message_segments(event.conv, segments)
     
 @DispatcherSingleton.register_hidden
 def hangouts(bot, event, *args):
@@ -131,7 +131,7 @@ def hangouts(bot, event, *args):
         segments.append(hangups.ChatMessageSegment(s))
         segments.append(hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK))
 
-    bot.send_message_segments(event.conv, segments)
+    yield from bot.send_message_segments(event.conv, segments)
 
 @DispatcherSingleton.register_hidden
 def leave(bot, event, conversation=None, *args):
@@ -168,7 +168,7 @@ def reload(bot, event, *args):
                     hangups.ChatMessageSegment('Usage: /reload'),
                     hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
                     hangups.ChatMessageSegment('Purpose: Reloads current config file.')]
-        bot.send_message_segments(event.conv, segments)
+        yield from bot.send_message_segments(event.conv, segments)
     else:
         bot.config.load()
 
@@ -209,7 +209,7 @@ def config(bot, event, cmd=None, *args):
                                            is_bold=True),
                 hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK)]
     segments.extend(UtilBot.text_to_segments(json.dumps(value, indent=2, sort_keys=True)))
-    bot.send_message_segments(event.conv, segments)
+    yield from bot.send_message_segments(event.conv, segments)
 
 
 @DispatcherSingleton.register_hidden
@@ -225,7 +225,7 @@ def block(bot, event, username=None, *args):
                     segments.append(hangups.ChatMessageSegment(user.full_name))
                     segments.append(hangups.ChatMessageSegment("\n", segment_type=hangups.SegmentType.LINE_BREAK))
             segments.pop()
-        bot.send_message_segments(event.conv, segments)
+        yield from bot.send_message_segments(event.conv, segments)
         return
     username_lower = username.strip().lower()
     for u in sorted(event.conv.users, key=lambda x: x.full_name.split()[-1]):
@@ -234,9 +234,9 @@ def block(bot, event, username=None, *args):
 
         if UtilBot.is_user_blocked(event.conv_id, u.id_):
             UtilBot.remove_from_blocklist(event.conv_id, u.id_)
-            bot.send_message(event.conv, "Unblocked User: {}".format(u.full_name))
+            yield from bot.send_message(event.conv, "Unblocked User: {}".format(u.full_name))
             return
         UtilBot.add_to_blocklist(event.conv_id, u.id_)
-        bot.send_message(event.conv, "Blocked User: {}".format(u.full_name))
+        yield from bot.send_message(event.conv, "Blocked User: {}".format(u.full_name))
         return
 

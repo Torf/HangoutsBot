@@ -59,9 +59,9 @@ Purpose: Get the first result from YouTube\'s search using search parameter.
         item_title = soup.find_all("a", class_="yt-uix-tile-link")[0]['title']
 
         if item_id in youtube_banlist:
-            bot.send_message(event.conv, 'Sorry, that video is banned.')
+            yield from bot.send_message(event.conv, 'Sorry, that video is banned.')
         else:
-            bot.send_message_segments(event.conv, [hangups.ChatMessageSegment('Result:', is_bold=True),
+            yield from bot.send_message_segments(event.conv, [hangups.ChatMessageSegment('Result:', is_bold=True),
                                                    hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
                                                    hangups.ChatMessageSegment(item_title, hangups.SegmentType.LINK,
                                                                               link_target=item_url)])

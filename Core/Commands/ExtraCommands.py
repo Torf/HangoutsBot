@@ -35,7 +35,7 @@ Usage: /remind delete <index to delete>
 Purpose: Will post a message the date and time specified to \
 the current chat. With no arguments, it'll list all the reminders.
 """)
-        bot.send_message_segments(event.conv, segments)
+        yield from bot.send_message_segments(event.conv, segments)
     else:
         if len(args) == 0:
             segments = [hangups.ChatMessageSegment('Reminders:', is_bold=True),
@@ -51,29 +51,29 @@ the current chat. With no arguments, it'll list all the reminders.
                             str(x + 1) + ' - ' + date_to_post.strftime('%m/%d/%y %I:%M%p') + ' : ' + reminder_text))
                     segments.append(hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK))
                 segments.pop()
-                bot.send_message_segments(event.conv, segments)
+                yield from bot.send_message_segments(event.conv, segments)
             else:
-                bot.send_message(event.conv, "No reminders are currently set.")
+                yield from bot.send_message(event.conv, "No reminders are currently set.")
             return
         if args[0] == 'delete':
             try:
                 x = int(args[1])
                 x -= 1
             except ValueError:
-                bot.send_message(event.conv, 'Invalid integer: ' + args[1])
+                yield from bot.send_message(event.conv, 'Invalid integer: ' + args[1])
                 return
             if x in range(0, len(reminders)):
                 reminder_to_remove_text = reminders[x][1]
                 reminders[x][0].cancel()
                 reminders.remove(reminders[x])
-                bot.send_message(event.conv, 'Removed reminder: ' + reminder_to_remove_text)
+                yield from bot.send_message(event.conv, 'Removed reminder: ' + reminder_to_remove_text)
             else:
-                bot.send_message(event.conv, 'Invalid integer: ' + str(x + 1))
+                yield from bot.send_message(event.conv, 'Invalid integer: ' + str(x + 1))
             return
 
         def send_reminder(bot, conv, reminder_time, reminder_text, loop):
             asyncio.set_event_loop(loop)
-            bot.send_message(conv, reminder_text)
+            yield from bot.send_message(conv, reminder_text)
             for reminder in reminders:
                 if reminder[0].interval == reminder_time and reminder[1] == reminder_text:
                     reminders.remove(reminder)
@@ -105,13 +105,13 @@ the current chat. With no arguments, it'll list all the reminders.
         if len(args) > 0:
             reminder_text = ' '.join(args)
         else:
-            bot.send_message(event.conv, 'No reminder text set.')
+            yield from bot.send_message(event.conv, 'No reminder text set.')
             return
         current_time = datetime.now()
         try:
             reminder_time = parser.parse(reminder_time)
         except (ValueError, TypeError):
-            bot.send_message(event.conv, "Couldn't parse " + reminder_time + " as a valid date.")
+            yield from bot.send_message(event.conv, "Couldn't parse " + reminder_time + " as a valid date.")
             return
         if reminder_time < current_time:
             reminder_time = current_time + timedelta(hours=1)
@@ -131,7 +131,7 @@ def finish(bot, event, *args):
 Usage: /finish <lyrics to finish> <optional: * symbol to show guessed song>
 Purpose: Finish a lyric!
 """)
-        bot.send_message_segments(event.conv, segments)
+        yield from bot.send_message_segments(event.conv, segments)
     else:
         showguess = False
         if args[-1] == '*':
@@ -141,9 +141,9 @@ Purpose: Finish a lyric!
         songs = Genius.search_songs(lyric)
 
         if len(songs) < 1:
-            bot.send_message(event.conv, "I couldn't find your lyrics.")
+            yield from bot.send_message(event.conv, "I couldn't find your lyrics.")
         if songs[0].artist.name == 'James Joyce':
-            bot.send_message(event.conv, "Sorry, that author is banned.")
+            yield from bot.send_message(event.conv, "Sorry, that author is banned.")
             return
         lyrics = songs[0].raw_lyrics
         anchors = {}
@@ -177,9 +177,9 @@ Purpose: Finish a lyric!
             segments = [hangups.ChatMessageSegment(found_lyric),
                         hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
                         hangups.ChatMessageSegment(songs[0].name)]
-            bot.send_message_segments(event.conv, segments)
+            yield from bot.send_message_segments(event.conv, segments)
         else:
-            bot.send_message(event.conv, found_lyric)
+            yield from bot.send_message(event.conv, found_lyric)
 
         return
 
@@ -197,7 +197,7 @@ Usage: /record strike
 Usage: /record
 Purpose: Store/Show records of conversations. Note: All records will be prepended by: "On the day of <date>," automatically.
 """)
-        bot.send_message_segments(event.conv, segments)
+        yield from bot.send_message_segments(event.conv, segments)
     else:
         import datetime
 
@@ -228,7 +228,7 @@ Purpose: Store/Show records of conversations. Note: All records will be prepende
                     hangups.ChatMessageSegment(line))
                 segments.append(hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK))
                 segments.append(hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK))
-            bot.send_message_segments(event.conv, segments)
+            yield from bot.send_message_segments(event.conv, segments)
 
         # Removes the last line recorded, iff the user striking is the same as the person who recorded last.
         # TODO This isn't working properly across multiple chats.
@@ -245,7 +245,7 @@ Purpose: Store/Show records of conversations. Note: All records will be prepende
                 last_recorded = None
                 last_recorder = None
             else:
-                bot.send_message(event.conv, "You do not have the authority to strike from the Record.")
+                yield from bot.send_message(event.conv, "You do not have the authority to strike from the Record.")
 
         # Lists every record available. TODO Paginate this?
         elif args[0] == "list":
@@ -254,7 +254,7 @@ Purpose: Store/Show records of conversations. Note: All records will be prepende
             for name in files:
                 segments.append(hangups.ChatMessageSegment(name.replace(".txt", "")))
                 segments.append(hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK))
-            bot.send_message_segments(event.conv, segments)
+            yield from bot.send_message_segments(event.conv, segments)
 
         # Shows a list of records that match the search criteria.
         elif args[0] == "search":
@@ -283,12 +283,12 @@ Purpose: Store/Show records of conversations. Note: All records will be prepende
                 for filename in foundin:
                     segments.append(hangups.ChatMessageSegment(filename))
                     segments.append(hangups.ChatMessageSegment("\n", hangups.SegmentType.LINE_BREAK))
-                bot.send_message_segments(event.conv, segments)
+                yield from bot.send_message_segments(event.conv, segments)
             else:
                 segments = [hangups.ChatMessageSegment("Couldn't find  "),
                             hangups.ChatMessageSegment(searched_term, is_bold=True),
                             hangups.ChatMessageSegment(" in any records.")]
-                bot.send_message_segments(event.conv, segments)
+                yield from bot.send_message_segments(event.conv, segments)
 
         # Lists a record from the specified date.
         elif args[0] == "date":
@@ -298,14 +298,14 @@ Purpose: Store/Show records of conversations. Note: All records will be prepende
             try:
                 dt = parser.parse(' '.join(args))
             except Exception as e:
-                bot.send_message(event.conv, "Couldn't parse " + ' '.join(args) + " as a valid date.")
+                yield from bot.send_message(event.conv, "Couldn't parse " + ' '.join(args) + " as a valid date.")
                 return
             filename = str(dt.date()) + ".txt"
             filepath = os.path.join(directory, filename)
             try:
                 file = open(filepath, "r")
             except IOError:
-                bot.send_message(event.conv, "No record for the day of " + dt.strftime('%B %d, %Y') + '.')
+                yield from bot.send_message(event.conv, "No record for the day of " + dt.strftime('%B %d, %Y') + '.')
                 return
             segments = [hangups.ChatMessageSegment('On the day of ' + dt.strftime('%B %d, %Y') + ':', is_bold=True),
                         hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK)]
@@ -313,13 +313,13 @@ Purpose: Store/Show records of conversations. Note: All records will be prepende
                 segments.append(hangups.ChatMessageSegment(line))
                 segments.append(hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK))
                 segments.append(hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK))
-            bot.send_message_segments(event.conv, segments)
+            yield from bot.send_message_segments(event.conv, segments)
 
         # Saves a record.
         else:
             file = open(filepath, "a+")
             file.write(' '.join(args) + '\n')
-            bot.send_message(event.conv, "Record saved successfully.")
+            yield from bot.send_message(event.conv, "Record saved successfully.")
             last_recorder = event.user.id_
             last_recorded = ' '.join(args) + '\n'
         if file is not None:
@@ -333,7 +333,7 @@ def spoof(bot, event, *args):
 Usage: /spoof
 Purpose: Who knows...
 """)
-        bot.send_message_segments(event.conv, segments)
+        yield from bot.send_message_segments(event.conv, segments)
     else:
         segments = [hangups.ChatMessageSegment('!!! CAUTION !!!', is_bold=True),
                     hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
@@ -342,7 +342,7 @@ Purpose: Who knows...
         segments.append(hangups.ChatMessageSegment(event.user.full_name, hangups.SegmentType.LINK,
                                                    link_target=link))
         segments.append(hangups.ChatMessageSegment(' has just been reporting to the NSA for attempted spoofing!'))
-        bot.send_message_segments(event.conv, segments)
+        yield from bot.send_message_segments(event.conv, segments)
 
 
 @DispatcherSingleton.register
@@ -353,7 +353,7 @@ def flip(bot, event, *args):
 Usage: /flip <optional: number of times to flip>
 Purpose: Flips a coin.
 """)
-        bot.send_message_segments(event.conv, segments)
+        yield from bot.send_message_segments(event.conv, segments)
     else:
         times = 1
         if len(args) > 0 and args[-1].isdigit():
@@ -366,9 +366,9 @@ Purpose: Flips a coin.
             else:
                 tails += 1
         if times == 1:
-            bot.send_message(event.conv, "Heads!" if heads > tails else "Tails!")
+            yield from bot.send_message(event.conv, "Heads!" if heads > tails else "Tails!")
         else:
-            bot.send_message(event.conv,
+            yield from bot.send_message(event.conv,
                              "Winner: " + (
                                  "Heads!" if heads > tails else "Tails!" if tails > heads else "Tie!") + " Heads: " + str(
                                  heads) + " Tails: " + str(tails) + " Ratio: " + (str(
@@ -384,7 +384,7 @@ Usage: /quote <optional: terms to search for> \
 <optional: number of quote to show>
 Purpose: Shows a quote.
 """)
-        bot.send_message_segments(event.conv, segments)
+        yield from bot.send_message_segments(event.conv, segments)
     else:
         USER_ID = "3696"
         DEV_ID = "ZWBWJjlb5ImJiwqV"
@@ -402,19 +402,19 @@ Purpose: Shows a quote.
             children = list(soup.results.children)
             numQuotes = len(children)
             if numQuotes == 0:
-                bot.send_message(event.conv, "Unable to find quote.")
+                yield from bot.send_message(event.conv, "Unable to find quote.")
                 return
 
             if fetch > numQuotes - 1:
                 fetch = numQuotes
             elif fetch < 1:
                 fetch = 1
-            bot.send_message(event.conv, "\"" +
+            yield from bot.send_message(event.conv, "\"" +
                              children[fetch - 1].quote.text + "\"" + ' - ' + children[
                 fetch - 1].author.text + ' [' + str(
                 fetch) + ' of ' + str(numQuotes) + ']')
         else:
-            bot.send_message(event.conv, "\"" + soup.quote.text + "\"" + ' -' + soup.author.text)
+            yield from bot.send_message(event.conv, "\"" + soup.quote.text + "\"" + ' -' + soup.author.text)
 
 @DispatcherSingleton.register
 def vote(bot, event, set_vote=None, *args):
@@ -435,29 +435,29 @@ def vote(bot, event, set_vote=None, *args):
                         'Usage: /vote admin (used to start a vote for a new conversation admin)'),
                     hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
                     hangups.ChatMessageSegment('Purpose: Starts a vote in which a 50% majority wins.')]
-        bot.send_message_segments(event.conv, segments)
+        yield from bot.send_message_segments(event.conv, segments)
     else:
 
         # Abstains user from voting.
         if set_vote is not None and set_vote.lower() == 'abstain':
             if UtilBot.is_vote_started(event.conv_id):
-                bot.send_message(event.conv, 'User {} has abstained from voting.'.format(event.user.full_name))
+                yield from bot.send_message(event.conv, 'User {} has abstained from voting.'.format(event.user.full_name))
                 if UtilBot.abstain_voter(event.conv_id, event.user.full_name):
-                    bot.send_message(event.conv, "The vote has ended because all voters have abstained.")
+                    yield from bot.send_message(event.conv, "The vote has ended because all voters have abstained.")
                     return
             else:
-                bot.send_message(event.conv, 'No vote currently in process to abstain from.')
+                yield from bot.send_message(event.conv, 'No vote currently in process to abstain from.')
                 return
 
             # Check if the vote has ended
             vote_result = UtilBot.check_if_vote_finished(event.conv_id)
             if vote_result is not None:
                 if vote_result != 0:
-                    bot.send_message(event.conv,
+                    yield from bot.send_message(event.conv,
                                      'In the matter of: "' + UtilBot.get_vote_subject(event.conv_id) + '", the ' + (
                                          'Yeas' if vote_result else 'Nays') + ' have it.')
                 else:
-                    bot.send_message(event.conv, "The vote ended in a tie in the matter of: {}".format(
+                    yield from bot.send_message(event.conv, "The vote ended in a tie in the matter of: {}".format(
                         UtilBot.get_vote_subject(event.conv_id)))
                 UtilBot.end_vote(event.conv_id)
             return
@@ -465,10 +465,10 @@ def vote(bot, event, set_vote=None, *args):
         # Cancels the vote
         if set_vote is not None and set_vote.lower() == "cancel":
             if UtilBot.is_vote_started(event.conv_id):
-                bot.send_message(event.conv, 'Vote "{}" cancelled.'.format(UtilBot.get_vote_subject(event.conv_id)))
+                yield from bot.send_message(event.conv, 'Vote "{}" cancelled.'.format(UtilBot.get_vote_subject(event.conv_id)))
                 UtilBot.end_vote(event.conv_id)
             else:
-                bot.send_message(event.conv, 'No vote currently started.')
+                yield from bot.send_message(event.conv, 'No vote currently started.')
             return
 
         # Starts a new vote
@@ -497,7 +497,7 @@ def vote(bot, event, set_vote=None, *args):
             UtilBot.init_new_vote(event.conv_id, event.conv.users)
             if vote_callback is not None:
                 UtilBot.set_vote_callback(event.conv_id, vote_callback)
-            bot.send_message(event.conv, "Vote started for subject: " + vote_subject)
+            yield from bot.send_message(event.conv, "Vote started for subject: " + vote_subject)
 
         # Cast a vote.
         elif set_vote is not None:
@@ -508,7 +508,7 @@ def vote(bot, event, set_vote=None, *args):
                 elif set_vote == "false" or set_vote == "no" or set_vote == "nay" or set_vote == "against":
                     UtilBot.set_vote(event.conv_id, event.user.full_name, False)
                 else:
-                    bot.send_message(event.conv,
+                    yield from bot.send_message(event.conv,
                                      "{}, you did not enter a valid vote parameter.".format(event.user.full_name))
                     return
 
@@ -516,16 +516,16 @@ def vote(bot, event, set_vote=None, *args):
                 vote_result = UtilBot.check_if_vote_finished(event.conv_id)
                 if vote_result is not None:
                     if vote_result != 0:
-                        bot.send_message(event.conv,
+                        yield from bot.send_message(event.conv,
                                          'In the matter of: "' + UtilBot.get_vote_subject(event.conv_id) + '", the ' + (
                                              'Yeas' if vote_result > 0 else 'Nays') + ' have it.')
                     else:
-                        bot.send_message(event.conv, "The vote ended in a tie in the matter of: {}".format(
+                        yield from bot.send_message(event.conv, "The vote ended in a tie in the matter of: {}".format(
                             UtilBot.get_vote_subject(event.conv_id)))
                     UtilBot.end_vote(event.conv_id, vote_result)
                 return
             else:
-                bot.send_message(event.conv_id, 'User {} is not allowed to vote.'.format(event.user.full_name))
+                yield from bot.send_message(event.conv_id, 'User {} is not allowed to vote.'.format(event.user.full_name))
                 return
 
         # Check the status of a vote.
@@ -533,9 +533,9 @@ def vote(bot, event, set_vote=None, *args):
             if UtilBot.is_vote_started(event.conv_id):
                 status = UtilBot.get_vote_status(event.conv_id)
                 if len(status) > 1:
-                    bot.send_message_segments(event.conv, UtilBot.text_to_segments('\n'.join(status)))
+                    yield from bot.send_message_segments(event.conv, UtilBot.text_to_segments('\n'.join(status)))
                 else:
-                    bot.send_message(event.conv, "No vote currently started.")
+                    yield from bot.send_message(event.conv, "No vote currently started.")
             else:
-                bot.send_message(event.conv, "No vote currently started.")
+                yield from bot.send_message(event.conv, "No vote currently started.")
             return

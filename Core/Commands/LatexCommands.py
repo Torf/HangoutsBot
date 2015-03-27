@@ -29,7 +29,7 @@ def latex(bot, event, *args):
 Usage: /latex <LaTeX code>
 Purpose: Renders LaTeX code to an image and sends it
 """)
-        bot.send_message_segments(event.conv, segments)
+        yield from bot.send_message_segments(event.conv, segments)
     else:
         cmd = "texvc /tmp images '" + \
               ' '.join(args).replace("'", "'\\''") + \

@@ -36,9 +36,8 @@ def think(bot, event, *args):
 
 def wasSpeakingToBot(event):
     if event.user_id.gaia_id in last_answer and last_answer[event.user_id.gaia_id]:
-        print('in!')
         diff = event.timestamp - last_answer[event.user_id.gaia_id]
-        print('diff:%s'%diff)
+        
         if diff.total_seconds() >= 0 and diff.total_seconds() <= 480:
             return True
         else:

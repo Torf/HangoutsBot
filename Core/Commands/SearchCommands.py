@@ -36,7 +36,7 @@ def define(bot, event, *args):
                     hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
                     hangups.ChatMessageSegment(
                         definition.replace('\n', ''))]
-        bot.send_message_segments(event.conv, segments)
+        yield from bot.send_message_segments(event.conv, segments)
     elif args[-1] == '*':
         args = list(args)
         args[-1] = '1:*'
@@ -62,7 +62,7 @@ def define(bot, event, *args):
         if start == end:
             end += 1
         if len(args) <= 1:
-            bot.send_message(event.conv, "Invalid usage for /define.")
+            yield from bot.send_message(event.conv, "Invalid usage for /define.")
             return
         query = ' '.join(args[:-1])
         definition_segments = [hangups.ChatMessageSegment(query.title(), is_bold=True),
@@ -83,7 +83,7 @@ def define(bot, event, *args):
                     end = length
                     display_all = False
                 x += 1
-            bot.send_message_segments(event.conv, definition_segments)
+            yield from bot.send_message_segments(event.conv, definition_segments)
         return
     else:
         args = list(args)
@@ -134,9 +134,9 @@ def wiki(bot, event, *args):
             hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
             hangups.ChatMessageSegment(page.summary(sentences=sentences))]
 
-        bot.send_message_segments(event.conv, segments)
+        yield from bot.send_message_segments(event.conv, segments)
     except PageError:
-        bot.send_message(event.conv, "Couldn't find \"{}\". Try something else.".format(' '.join(args)))
+        yield from bot.send_message(event.conv, "Couldn't find \"{}\". Try something else.".format(' '.join(args)))
 
 
 # TODO Sometimes, this'll just link straight to the search page. Attempting to compare the url set here with the url we
@@ -162,7 +162,7 @@ def goog(bot, event, *args):
     resp = request.urlopen(req)
     soup = BeautifulSoup(resp)
 
-    bot.send_message_segments(event.conv, [hangups.ChatMessageSegment('Result:', is_bold=True),
+    yield from bot.send_message_segments(event.conv, [hangups.ChatMessageSegment('Result:', is_bold=True),
                                            hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
                                            hangups.ChatMessageSegment(soup.title.string, hangups.SegmentType.LINK,
                                                                       link_target=url)])
@@ -177,14 +177,14 @@ Usage: /udefine <word to search for> \
 <optional: definition number [defaults to 1st]>
 Purpose: Define a word.
 """)
-        bot.send_message_segments(event.conv, segments)
+        yield from bot.send_message_segments(event.conv, segments)
     else:
         yield from bot.send_typing(event.conv)
         api_host = 'http://urbanscraper.herokuapp.com/search/'
         num_requested = 0
         returnall = False
         if len(args) == 0:
-            bot.send_message(event.conv, "Invalid usage of /udefine.")
+            yield from bot.send_message(event.conv, "Invalid usage of /udefine.")
             return
         else:
             if args[-1] == '*':
@@ -199,7 +199,7 @@ Purpose: Define a word.
             response = requests.get(api_host + term)
             error_response = 'No definition found for \"{}\".'.format(' '.join(args))
             if response.status_code != 200:
-                bot.send_message(event.conv, error_response)
+                yield from bot.send_message(event.conv, error_response)
             result = response.content.decode()
             result_list = json.loads(result)
             num_requested = min(num_requested, len(result_list) - 1)
@@ -211,11 +211,11 @@ Purpose: Define a word.
                 for string in result_list:
                     segments.append(hangups.ChatMessageSegment(string))
                     segments.append(hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK))
-                bot.send_message_segments(event.conv, segments)
+                yield from bot.send_message_segments(event.conv, segments)
             else:
                 segments = [hangups.ChatMessageSegment(' '.join(args), is_bold=True),
                             hangups.ChatMessageSegment('\n', hangups.SegmentType.LINE_BREAK),
                             hangups.ChatMessageSegment(result + ' [{0} of {1}]'.format(
                                 num_requested + 1, len(result_list)))]
-                bot.send_message_segments(event.conv, segments)
+                yield from bot.send_message_segments(event.conv, segments)
 

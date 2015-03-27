@@ -22,8 +22,10 @@ LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 base_config = '''{
   "admins": ["YOUR-USER-ID-HERE"],
   "autoreplies_enabled": true,
+  "autoreplies_name":"Bot"
+  "autoreplies_maxtime":300,
   "autoreplies": [
-    [["bot", "robot", "Yo"], "/think {}"]
+    [["*"], "/think {}"]
   ],
   "development_mode": false,
   "commands_admin": ["hangouts", "reload", "quit", "restart", "config", "restart", "block"],

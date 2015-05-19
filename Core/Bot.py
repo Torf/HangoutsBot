@@ -16,6 +16,8 @@ from Libraries.cleverbot import ChatterBotFactory, ChatterBotType
 from Core.Util import ConfigDict
 from Core import Handlers
 
+from unidecode import unidecode
+
 
 __version__ = '1.1'
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -235,7 +237,7 @@ class HangoutsBot(object):
                 file = open(os.path.join(directory, filename), "a+")
                 file.write(text + '\n')
             else:
-                text = "Name changed to: %s" % {'name': conv_event.new_name }
+                text = "Name changed to: %s" % unidecode(conv_event.new_name)
                 directory = os.path.join("Records", str(event.conv_id))
                 if not os.path.exists(directory):
                     os.makedirs(directory)
@@ -314,7 +316,7 @@ class HangoutsBot(object):
 
         print('Conversations:')
         for c in self.list_conversations():
-            print('  %s (%s)' % ({ 'name' : get_conv_name(c, truncate=True) }, c.id_))
+            print('  %s (%s)' % (unidecode(get_conv_name(c, truncate=True)), c.id_))
         print()
 
         msg = "I'm alive!"

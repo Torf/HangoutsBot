@@ -314,7 +314,7 @@ class HangoutsBot(object):
 
         print('Conversations:')
         for c in self.list_conversations():
-            print('  {} ({})'.format(get_conv_name(c, truncate=True), c.id_))
+            print('  {} ({})'.format(get_conv_name(c, truncate=True), c.id_).encode('UTF-8'))
         print()
 
         msg = "I'm alive!"

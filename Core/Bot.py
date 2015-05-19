@@ -235,7 +235,7 @@ class HangoutsBot(object):
                 file = open(os.path.join(directory, filename), "a+")
                 file.write(text + '\n')
             else:
-                text = "Name changed to: %s" % conv_event.new_name
+                text = "Name changed to: %s" % {'name': conv_event.new_name }
                 directory = os.path.join("Records", str(event.conv_id))
                 if not os.path.exists(directory):
                     os.makedirs(directory)
@@ -314,7 +314,7 @@ class HangoutsBot(object):
 
         print('Conversations:')
         for c in self.list_conversations():
-            print('  %s (%s)' % (get_conv_name(c, truncate=True), c.id_))
+            print('  %s (%s)' % ({ 'name' : get_conv_name(c, truncate=True) }, c.id_))
         print()
 
         msg = "I'm alive!"
